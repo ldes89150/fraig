@@ -13,6 +13,9 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <map>
+
+
 
 using namespace std;
 
@@ -60,6 +63,15 @@ public:
 
 private:
    ofstream           *_simLog;
+   unsigned M;
+   unsigned I;
+   unsigned L;
+   unsigned O;
+   unsigned A;
+   CirGate** gate;
+   map<unsigned,string> nameTable;
+   vector<unsigned> PIs;
+   vector<unsigned> POs;
 
 };
 
