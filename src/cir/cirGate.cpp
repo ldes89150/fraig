@@ -42,9 +42,7 @@ CirGate::reportGate() const
     cout<<"=================================================="<<endl
         <<ss.str()<<endl
         <<"=================================================="<<endl;
-
 }
-
 void
 CirGate::reportFanin(int level) const
 {
@@ -53,17 +51,14 @@ CirGate::reportFanin(int level) const
     printFanIn(0,level,false,reported);
     delete reported;
 }
-
 void
 CirGate::reportFanout(int level) const
 {
-   assert (level >= 0);
-   set<unsigned>* reported = new set<unsigned>();
-   printFanOut(0,level,false,reported);
-   delete reported;
+    assert (level >= 0);
+    set<unsigned>* reported = new set<unsigned>();
+    printFanOut(0,level,false,reported);
+    delete reported;
 }
-
-
 void CirGate::printFanIn(unsigned inden, int level, bool inverse, set<unsigned>* &reported) const
 {
     cout<<string(inden, ' ');
@@ -71,7 +66,6 @@ void CirGate::printFanIn(unsigned inden, int level, bool inverse, set<unsigned>*
     {
         cout<<'!';
     }
-   
     cout<<gateTypeStr(gateType)<<' '<<id;
     if(reported->count(id)==1 and !fanIn.empty() and level >0)
     {
@@ -87,7 +81,7 @@ void CirGate::printFanIn(unsigned inden, int level, bool inverse, set<unsigned>*
         }
         reported->insert(id);
         for(vector<CirGate::net>::const_iterator itr = fanIn.begin();
-            itr != fanIn.end();itr++)
+                itr != fanIn.end(); itr++)
         {
             CirGate* gate = cirMgr->getGate(itr->first);
             if(gate == 0)
@@ -99,12 +93,8 @@ void CirGate::printFanIn(unsigned inden, int level, bool inverse, set<unsigned>*
                 gate->printFanIn(inden+2,level-1,(itr->second),reported);
             }
         }
-
     }
-
 }
-
-
 void CirGate::printFanOut(unsigned inden, int level, bool inverse, set<unsigned>* &reported) const
 {
     cout<<string(inden, ' ');
@@ -112,7 +102,6 @@ void CirGate::printFanOut(unsigned inden, int level, bool inverse, set<unsigned>
     {
         cout<<'!';
     }
-   
     cout<<gateTypeStr(gateType)<<' '<<id;
     if(reported->count(id)==1 and !fanOut.empty() and level >0)
     {
@@ -128,7 +117,7 @@ void CirGate::printFanOut(unsigned inden, int level, bool inverse, set<unsigned>
         }
         reported->insert(id);
         for(vector<CirGate::net>::const_iterator itr = fanOut.begin();
-            itr != fanOut.end();itr++)
+                itr != fanOut.end(); itr++)
         {
             CirGate* gate = cirMgr->getGate(itr->first);
             if(gate == 0)
@@ -140,9 +129,7 @@ void CirGate::printFanOut(unsigned inden, int level, bool inverse, set<unsigned>
                 gate->printFanOut(inden+2,level-1,(itr->second),reported);
             }
         }
-
     }
-
 }
 void CirGate::printUndef(unsigned inden, bool inverse, unsigned undefID) const
 {
@@ -154,13 +141,15 @@ void CirGate::printUndef(unsigned inden, bool inverse, unsigned undefID) const
     cout<<gateTypeStr(UNDEF_GATE)<<' '<<undefID<<endl;
 }
 
-
+/*
 void CirGate::addFanIn(net i)
 {
     fanIn.push_back(i);
 }
+*/
 
-void CirGate::addFanOut(net i)
+void CirGate::addFanOut(unsigned ID,bool inverse)
 {
-    fanOut.push_back(i);
+    fanOut.push_back(net(ID,inverse));
 }
+

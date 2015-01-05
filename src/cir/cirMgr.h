@@ -14,8 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-
-
+#include <set>
 
 using namespace std;
 
@@ -29,12 +28,41 @@ class CirMgr
 {
 public:
    CirMgr() {}
-   ~CirMgr() {}
+   ~CirMgr()
+   {
+       
+       CirGate * gate;
+       if(gates==0)
+           return;
+       for(unsigned i =0;i<M+O+1;i++)
+       {
+           gate = getGate(i);
+           if(gate !=0)
+               delete gate;
+       }
+       delete gates;
+       
+   }
 
    // Access functions
    // return '0' if "gid" corresponds to an undefined gate.
-   CirGate* getGate(unsigned gid) const { return 0; }
-
+   CirGate* getGate(unsigned gid) const
+   {
+       if(gid >= (M+O+1))
+       {
+           return 0;
+       }
+       return gates[gid];
+   }
+   // My Custom Function
+   string getGateName(unsigned gid) const
+   {
+       map<unsigned,string>::const_iterator itr = nameTable.find(gid);
+       if(itr == nameTable.end())
+           return "";
+       else
+           return (*itr).second;
+   }
    // Member functions about circuit construction
    bool readCircuit(const string&);
 
@@ -63,15 +91,25 @@ public:
 
 private:
    ofstream           *_simLog;
-   unsigned M;
-   unsigned I;
-   unsigned L;
-   unsigned O;
-   unsigned A;
-   CirGate** gate;
-   map<unsigned,string> nameTable;
+
+   typedef map<unsigned,CirGate*> cirDict;
+   unsigned int M;
+   unsigned int I;
+   unsigned int L;
+   unsigned int O;
+   unsigned int A;
+   CirGate** gates;
    vector<unsigned> PIs;
    vector<unsigned> POs;
+   //vector<unsigned> Ls;
+   //vector<unsigned> As;
+   set<unsigned> unDefs;//change name (floatFanInID)
+   set<unsigned> gatesWithFloatFanin;
+   vector<unsigned> dfsList;
+   //set<unsigned> reachableID;
+   map<unsigned,string> nameTable;
+   void buildfanout();
+   void buildDFSList();
 
 };
 

@@ -20,6 +20,8 @@ class CirGate;
 class CirMgr;
 class SatSolver;
 
+typedef vector<CirGate*>           GateList;
+typedef vector<unsigned>           IdList;
 
 enum GateType
 {
@@ -30,5 +32,6 @@ enum GateType
    CONST_GATE = 4,
 
    TOT_GATE
-}
+};
+
 #endif // CIR_DEF_H
