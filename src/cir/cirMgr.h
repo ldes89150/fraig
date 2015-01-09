@@ -112,8 +112,6 @@ private:
    void buildDFSList();
    
    CirGate** cirGateBegin()         {return gates;}
-   CirGate** cirInputGateBegin()    {return gates + 1;}
-   CirGate** cirAIGGateBegin()      {return gates + (I+1);}
    CirGate** cirOutputGateBegin()   {return gates + (M+1);}
    CirGate** cirGateEnd()           {return gates + (M+O+1);}
 

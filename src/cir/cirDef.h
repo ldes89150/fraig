@@ -11,6 +11,9 @@
 
 #include <vector>
 #include "myHashMap.h"
+#include <utility>
+
+
 
 using namespace std;
 
@@ -22,6 +25,9 @@ class SatSolver;
 
 typedef vector<CirGate*>           GateList;
 typedef vector<unsigned>           IdList;
+
+typedef pair<unsigned,bool> net;
+
 
 enum GateType
 {

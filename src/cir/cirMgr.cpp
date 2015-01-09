@@ -302,7 +302,7 @@ CirMgr::readCircuit(const string& fileName)
         {
             continue;
         }
-        for(vector<CirGate::net>::const_iterator itr = gates[i]->fanIn.begin();
+        for(vector<net>::const_iterator itr = gates[i]->fanIn.begin();
             itr != gates[i]->fanIn.end();itr++)
         {
             ID = (*itr).first;
@@ -365,7 +365,7 @@ CirMgr::printNetlist() const
         }
         cout<<left<<setw(4)<<CirGate::gateTypeStr(gate->gateType)
             <<( *itr);
-        for(vector<CirGate::net>::const_iterator ite =gate->fanIn.begin();
+        for(vector<net>::const_iterator ite =gate->fanIn.begin();
             ite != gate->fanIn.end();ite++)
         {
             cout<<' ';
@@ -482,7 +482,7 @@ CirMgr::writeAag(ostream& outfile) const
          if(gates[*ite]->gateType==AIG_GATE)
          {
              outfile<<endl<<(gates[(*ite)]->id)*2;
-             for(vector<CirGate::net>::const_iterator itr = gates[(*ite)]->fanIn.begin();
+             for(vector<net>::const_iterator itr = gates[(*ite)]->fanIn.begin();
                  itr != gates[(*ite)]->fanIn.end();itr++)
              {
                     outfile<<' '<<CirGate::get_pin(*itr);
@@ -521,7 +521,7 @@ void CirMgr::buildfanout()
     {
         if(gates[i] != 0)
         {
-            for(vector<CirGate::net>::const_iterator itr = gates[i]->fanIn.begin();
+            for(vector<net>::const_iterator itr = gates[i]->fanIn.begin();
                 itr != gates[i]->fanIn.end();itr++)
             {
                 CirGate* gate = getGate(itr->first);
@@ -550,7 +550,7 @@ CirMgr::buildDFSList()
         {
             store = true;
             gate = getGate(gateID);
-            for(vector<CirGate::net>::const_iterator itr = gate->fanIn.begin();
+            for(vector<net>::const_iterator itr = gate->fanIn.begin();
                 itr != gate->fanIn.end();itr++)
             {
                 tmp = getGate(itr->first);

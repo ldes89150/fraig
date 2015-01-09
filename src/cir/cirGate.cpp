@@ -80,7 +80,7 @@ void CirGate::printFanIn(unsigned inden, int level, bool inverse, set<unsigned>*
             return;
         }
         reported->insert(id);
-        for(vector<CirGate::net>::const_iterator itr = fanIn.begin();
+        for(vector<net>::const_iterator itr = fanIn.begin();
                 itr != fanIn.end(); itr++)
         {
             CirGate* gate = cirMgr->getGate(itr->first);
@@ -116,7 +116,7 @@ void CirGate::printFanOut(unsigned inden, int level, bool inverse, set<unsigned>
             return;
         }
         reported->insert(id);
-        for(vector<CirGate::net>::const_iterator itr = fanOut.begin();
+        for(vector<net>::const_iterator itr = fanOut.begin();
                 itr != fanOut.end(); itr++)
         {
             CirGate* gate = cirMgr->getGate(itr->first);

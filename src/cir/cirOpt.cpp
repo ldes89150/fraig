@@ -10,6 +10,7 @@
 #include "cirMgr.h"
 #include "cirGate.h"
 #include "util.h"
+#include <queue>
 
 using namespace std;
 
@@ -30,34 +31,73 @@ using namespace std;
 void
 CirMgr::sweep()
 {
+    set<unsigned> removeId;
+    queue<CirGate**> removePtr;
     GateType g;
-    for(CirGate** ptr = cirGateBegin();
-        ptr != cirGateEnd(); ptr++)
+    CirGate** ptr;
+    for(ptr = cirGateBegin()+1; // skip const gate
+        ptr != cirOutputGateBegin(); ptr++)
     {
-        if((*ptr) != 0)
+        if(*ptr == 0)
+            continue;
+        if((*ptr)->reachability)
+            continue;
+        g = (*ptr)->gateType;
+        if(g == PI_GATE ) 
+            continue;
+        if(g == AIG_GATE)
         {
-            if(!((*ptr)->reachability))
+           A--;
+        }
+        else
+        {
+            #if DEBUG
+            assert(g == UNDEF_GATE);
+            #endif
+            bool c = false;
+            //keep "good" undef gate
+            for(vector<net>::const_iterator itr = (*ptr)->fanOut.begin();
+                itr != (*ptr)->fanOut.end();itr++)
             {
-                g = (*ptr)->gateType;
-                if(g == AIG_GATE)
+                if(getGate(itr->first)->reachability)
                 {
-                    A--;
+                    c = true;
+                    break;
+                }                
+            }
+            if(c) continue;
+        }
+        removeId.insert((*ptr)->id);
+        removePtr.push(ptr);
+    }
+    //If the fanIn gate of the gate to be removed would be kept after sweep,
+    //modify its fanOut.
+    while(not removePtr.empty())
+    {
+        ptr = removePtr.front();
+
+        for(vector<net>::const_iterator itr = (*ptr)->fanIn.begin();
+            itr != (*ptr)->fanIn.end(); itr++)
+        {
+            CirGate* gate = getGate(itr->first);
+            if(removeId.find(gate->id) == removeId.end())
+                continue;
+            for(vector<net>::iterator ite = gate->fanOut.begin();
+                ite != gate->fanOut.end(); ite++)
+            {
+                if((ite->first) == (*ptr)->id)
+                {
+                    gate->fanOut.erase(ite);
+                    break;
                 }
-                else if(g == CONST_GATE or g == PI_GATE)
-                {
-                   continue;
-                } 
-                //Assert Undefine Gates have false reachability
-                #if DEBUG
-                assert(g != PO_GATE); // Asser that all PO gates are reachable.
-                assert(g == AIG_GATE or g == UNDEF_GATE);
-                #endif
-                cout<<"Sweeping: "<<g
-                    <<"("<<(*ptr)->id<<") removed..."<<endl;
-                delete (*ptr);
-                (*ptr) = 0;
             }
         }
+        cout<<"Sweeping: "<<g
+             <<"("<<(*ptr)->id<<") removed..."<<endl;
+        delete (*ptr);
+        (*ptr) = 0;
+
+        removePtr.pop();
     }
 }
 
@@ -69,4 +109,6 @@ CirMgr::optimize()
 /***************************************************/
 /*   Private member functions about optimization   */
 /***************************************************/
+
+
 
