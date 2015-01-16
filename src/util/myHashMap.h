@@ -59,8 +59,41 @@ public:
       friend class HashMap<HashKey, HashData>;
 
    public:
+      const HashNode& operator * () const {return *subitr;}
+      HashNode& operator* () {return *subitr;}
+      iterator& operator ++ ()
+      {
+          if(subitr == bucketlist[nBucket-1].end())
+          {
+              return (*this);
+          }
+          if(subitr != bucketlist[n].end()-1)
+          {
+              subitr++;
+              return (*this);
+          } 
+          else
+          {
+              for(size_t i = n+1; i < nBucket; i++)
+              {
+                    if(bucketlist[i].size() != 0)
+                    {
+                        n = i; 
+                        subitr = bucketlist[n].begin();
+                        return (*this);
+                    }
+              }
+              n = nBucket -1;
+              subitr = bucketlist[n].end();
+              return (*this);
+          }  
+      }
 
    private:
+      size_t n;
+      vector<HashNode>* bucketlist;
+      size_t nBucket;
+      typename vector<HashNode>::iterator subitr;
    };
 
    void init(size_t b) {
@@ -81,9 +114,18 @@ public:
    // Pass the end
    iterator end() const { iterator(); }
    // return true if no valid data
-   bool empty() const { return true; }
+   bool empty() const { return size() == 0; }
    // number of valid data
-   size_t size() const { size_t s = 0; return s; }
+   size_t size() const 
+   {
+       size_t count = 0;
+       for(size_t i = 0;i != _numBuckets;i++)
+       {
+           count += _buckets[i].size();
+       }
+       return count;
+   }
+
 
 private:
    // Do not add any extra data member
