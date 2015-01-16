@@ -114,6 +114,9 @@ private:
    CirGate** cirGateBegin()         {return gates;}
    CirGate** cirOutputGateBegin()   {return gates + (M+1);}
    CirGate** cirGateEnd()           {return gates + (M+O+1);}
+   
+   void merge(CirGate* a, CirGate* b, bool invert ,string why);
+   void checkhealth();
 
 };
 

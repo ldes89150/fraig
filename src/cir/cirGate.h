@@ -16,6 +16,7 @@
 #include "sat.h"
 #include <set>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -74,6 +75,15 @@ public:
             return "";
       }
    }
+   struct netEraser
+   {
+      netEraser(unsigned id) : id(id) {}
+      unsigned id;
+      bool operator()(net i) const
+      {
+         return i.first != id;
+      }
+   };
 
 private:
    void printUndef(unsigned inden, bool inverse, unsigned undefID) const;
@@ -87,6 +97,22 @@ protected:
    unsigned int id;
    unsigned int lineNo;
    bool reachability;
+
+   void removeFanInID(unsigned cid)
+   {
+      fanIn.erase(remove_if(fanIn.begin(),
+                            fanIn.end(),
+                            netEraser(cid)),
+                  fanIn.end());
+   }
+   void removeFanOutID(unsigned cid)
+   {
+      fanOut.erase(remove_if(fanOut.begin(),
+                            fanOut.end(),
+                            netEraser(cid)),
+                   fanOut.end());      
+   }
+   
 
 };
 

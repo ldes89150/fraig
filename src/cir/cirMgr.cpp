@@ -538,7 +538,15 @@ void CirMgr::buildfanout()
 void
 CirMgr::buildDFSList()
 {
-   stack<unsigned> trace;
+    dfsList.clear();
+    for(CirGate** ptr = cirGateBegin();ptr != cirGateEnd(); ptr++)
+    {
+        if((*ptr) == 0)
+            continue;
+        (*ptr)->reachability = false;
+        
+    }
+    stack<unsigned> trace;
     unsigned gateID;
     CirGate* gate;
     CirGate* tmp;
@@ -585,5 +593,24 @@ CirMgr::buildDFSList()
         }
 
     }
+}
+
+
+void CirMgr::checkhealth()
+{
+    /*
+    for(CirGate** gate = cirGateBegin(); gate != cirGateEnd(); gate++)
+    {
+        if(*gate == 0)
+            continue;
+        for(std::vector<net> iterator itr = (*gate)->fanIn.begin();
+            itr != (*gate)->fanIn.end(); itr++)
+        {
+            
+        }
+        
+    }*/
+    return;
+
 }
 

@@ -15,6 +15,7 @@
 #include "cirMgr.h"
 #include "util.h"
 #include <set>
+#include <algorithm>
 
 using namespace std;
 
@@ -158,6 +159,8 @@ net make_net(unsigned &pin)
 {
     return net(pin/2,(pin%2) == 1);
 }
+
+
 unsigned get_pin(net l)
 {
     if(l.second)
