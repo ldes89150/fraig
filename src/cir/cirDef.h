@@ -26,8 +26,6 @@ class SatSolver;
 typedef vector<CirGate*>           GateList;
 typedef vector<unsigned>           IdList;
 
-typedef pair<unsigned,bool> net;
-
 
 enum GateType
 {

@@ -21,6 +21,13 @@ using namespace std;
 
 // TODO: Feel free to define your own classes, variables, or functions.
 
+
+typedef pair<unsigned,bool> net;
+
+net make_net(unsigned &pin);
+unsigned get_pin(net l);
+
+
 class CirGate;
 
 //------------------------------------------------------------------------
@@ -34,19 +41,6 @@ public:
    // Basic access methods
    string getTypeStr() const { return ""; }
    unsigned getLineNo() const { return 0; }
-
-   typedef pair<unsigned,bool> net;
-        net make_net(unsigned &pin)
-        {
-            return net(pin/2,(pin%2) == 1);
-        }
-        static unsigned get_pin(net l)
-        {
-            if(l.second)
-                return l.first*2+1;
-            else
-                return l.first*2;
-        }
 
 
    CirGate() : reachability(false){}

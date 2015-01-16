@@ -153,3 +153,16 @@ void CirGate::addFanOut(unsigned ID,bool inverse)
     fanOut.push_back(net(ID,inverse));
 }
 
+
+net make_net(unsigned &pin)
+{
+    return net(pin/2,(pin%2) == 1);
+}
+unsigned get_pin(net l)
+{
+    if(l.second)
+        return l.first*2+1;
+    else
+        return l.first*2;
+}
+

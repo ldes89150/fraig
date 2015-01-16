@@ -485,7 +485,7 @@ CirMgr::writeAag(ostream& outfile) const
              for(vector<net>::const_iterator itr = gates[(*ite)]->fanIn.begin();
                  itr != gates[(*ite)]->fanIn.end();itr++)
              {
-                    outfile<<' '<<CirGate::get_pin(*itr);
+                    outfile<<' '<<get_pin(*itr);
              }
          }
 
