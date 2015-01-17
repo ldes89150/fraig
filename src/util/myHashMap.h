@@ -10,6 +10,8 @@
 #define MY_HASH_MAP_H
 
 #include <vector>
+#include <utility>
+
 
 using namespace std;
 
@@ -125,7 +127,29 @@ public:
        }
        return count;
    }
+   bool retrive(const HashKey& k, HashData& n)
+   {
+       vector<HashNode>* curbucket = _buckets + ( k() % _numBuckets);
+       if(curbucket->empty())
+       {
+           return false;
+       }
+       for(typename vector<HashNode>::const_iterator itr = curbucket->begin();
+           itr != curbucket->end(); itr++)
+       {
+           if(itr->first == k)
+           {
+               n = itr->second;
+               return true;
+           }
+       }
+       return false;
+   }
 
+   void quickInsert(const HashKey& k, const HashData& d)
+   {
+       _buckets[k() % _numBuckets].push_back(make_pair(k,d));
+   }
 
 private:
    // Do not add any extra data member

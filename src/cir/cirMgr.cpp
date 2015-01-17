@@ -614,3 +614,20 @@ void CirMgr::checkhealth()
 
 }
 
+void CirMgr::removeGate(unsigned gid)
+{
+    CirGate** ptr  = gates + gid;
+    if(*ptr == 0)
+        return;
+    enum GateType g = (*ptr)->gateType;
+    if(g == PI_GATE)
+       I--;
+    if(g == PO_GATE)
+       O--;
+    if(g == AIG_GATE)
+       A--; 
+
+   delete (*ptr);
+   (*ptr) = 0;
+
+}

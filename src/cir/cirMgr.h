@@ -117,6 +117,8 @@ private:
    
    void merge(CirGate* a, CirGate* b, bool invert ,string why);
    void checkhealth();
+   void removeGate(unsigned gid);
+
 
 };
 

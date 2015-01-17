@@ -31,14 +31,19 @@ unsigned get_pin(net l);
 
 class CirGate;
 
+
 //------------------------------------------------------------------------
 //   Define classes
 //------------------------------------------------------------------------
+
+
+/*******************************************/
+
 class CirGate
 {
 public:
    friend class CirMgr;
-
+   friend class FanInKey;
    // Basic access methods
    string getTypeStr() const { return ""; }
    unsigned getLineNo() const { return 0; }
@@ -84,6 +89,48 @@ public:
          return i.first != id;
       }
    };
+   class FanInKey
+{
+public:
+    FanInKey()
+    {
+        fanin[0] = fanin[1] = net(0,false);
+    }
+    FanInKey(CirGate* g)
+    {
+        fanin[0] = g->fanIn[0];
+        fanin[1] = g->fanIn[1];
+    }
+
+    ~FanInKey(){};
+    size_t operator() () const
+    {
+        size_t a,b;
+        if(fanin[0].second)
+            a = ~(fanin[0].first);
+        else
+            a = fanin[0].first;
+
+        if(fanin[1].second)
+            b = ~(fanin[1].first);
+        else
+            b = fanin[1].first;        
+        return a + b + (a%256)*(b%256);
+    }
+   bool operator == (const FanInKey& fk) const
+    {
+        return (fanin[0] == fk.fanin[0] and fanin[1] == fk.fanin[1]) or
+               (fanin[1] == fk.fanin[0] and fanin[0] == fk.fanin[1]);
+    }
+    void operator = (const FanInKey& fk)
+    {
+        fanin[0] = fk.fanin[0];
+        fanin[1] = fk.fanin[1];
+    }
+
+private:
+    net  fanin[2];
+};
 
 private:
    void printUndef(unsigned inden, bool inverse, unsigned undefID) const;
@@ -112,8 +159,14 @@ protected:
                             netEraser(cid)),
                    fanOut.end());      
    }
-   
 
+   FanInKey getKey()
+   {
+        return FanInKey(this);    
+   }
 };
+
+
+
 
 #endif // CIR_GATE_H

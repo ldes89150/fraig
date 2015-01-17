@@ -32,6 +32,36 @@ using namespace std;
 void
 CirMgr::strash()
 {
+    unsigned n;
+    if(A>100)
+        n = A/100;
+    else
+        n = 100;
+
+    HashMap<CirGate::FanInKey, unsigned> gatesHashMap((size_t) n);
+    unsigned match;
+    CirGate::FanInKey key;
+    CirGate* gate; 
+    for(vector<unsigned>::iterator itr = dfsList.begin();
+        itr != dfsList.end(); itr++)
+    {
+        gate = getGate(*itr);
+        if(gate->gateType !=AIG_GATE)
+            continue;
+
+        key = gate->getKey();
+        //cout<<"id:"<<gate->id<<" k():"<<key()<<endl;
+        if(gatesHashMap.retrive(key,match))
+        {
+            merge(gate,getGate(match),false,"Strashing");
+            removeGate(*itr);
+        }
+        else
+        {
+            gatesHashMap.quickInsert(key,*itr);
+        }
+    }
+    this->buildDFSList();
 }
 
 void
