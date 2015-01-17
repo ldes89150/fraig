@@ -119,7 +119,17 @@ private:
    void checkhealth();
    void removeGate(unsigned gid);
 
+   //for simulation
+   map<unsigned,vector<uint32_t> > patternPool;
 
+
+   void gateSim(unsigned gid, unsigned round);
+   void roundSim(unsigned round);
+   void resetSim();
+   void randomAddPattern();
 };
+
+
+
 
 #endif // CIR_MGR_H

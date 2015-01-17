@@ -12,7 +12,7 @@
 #include <vector>
 #include "myHashMap.h"
 #include <utility>
-
+#include <stdint.h>
 
 
 using namespace std;

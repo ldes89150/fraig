@@ -31,7 +31,7 @@ extern CirMgr *cirMgr;
 void
 CirGate::reportGate() const
 {
-    stringstream ss;
+    stringstream ss, pat;
     string gname = cirMgr->getGateName(id);
     ss<<"= "<<CirGate::gateTypeStr(gateType)<<'('<<id<<')';
     if(not gname.empty())
@@ -40,8 +40,26 @@ CirGate::reportGate() const
     }
     ss<<", line "<<lineNo;
     ss<<string(49-ss.tellp(),' ')<<'=';
+
+    pat<<"= Value: ";
+    uint32_t lastSimValue;
+    if(not pattern.empty())
+        lastSimValue = *(pattern.end()-1);
+    else
+        lastSimValue = 0;
+
+    for(int i = 31;i>=0;i--)
+    {
+        pat<<((lastSimValue & (1 << i))?'1':'0');
+        if(i%4 == 0 && i!=0)
+            pat<<'_';
+    }
+    pat<<string(49-pat.tellp(),' ')<<'=';
+    
+    
     cout<<"=================================================="<<endl
         <<ss.str()<<endl
+        <<pat.str()<<endl
         <<"=================================================="<<endl;
 }
 void

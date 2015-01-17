@@ -316,6 +316,15 @@ CirMgr::readCircuit(const string& fileName)
     }
     buildfanout();
     buildDFSList();
+
+    for(vector<unsigned>::const_iterator itr = PIs.begin();
+        itr != PIs.end();itr++)
+    {
+        patternPool[*itr /2] = vector<unsigned>();
+
+    }
+
+
     return true;
 
 }

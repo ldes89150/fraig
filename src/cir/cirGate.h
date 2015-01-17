@@ -144,6 +144,8 @@ protected:
    unsigned int id;
    unsigned int lineNo;
    bool reachability;
+   
+   vector<uint32_t> pattern;
 
    void removeFanInID(unsigned cid)
    {
