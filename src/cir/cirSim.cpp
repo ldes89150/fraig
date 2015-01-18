@@ -34,11 +34,19 @@ using namespace std;
 void
 CirMgr::randomSim()
 {
-    resetSim();
-    fecGroupInit();
-    randomAddPattern();
-    roundSim(0);
-    fecGroupUpdate();
+    if(not simulate)
+        resetSim();
+    unsigned fail = 0;
+    unsigned round;
+    for(round = 0;fail <3;round++)
+    {
+        randomAddPattern();
+        roundSim(round);
+        if(not fecGroupUpdate())
+            fail++;
+    }
+    cout<<"MAX_FAIL = 3"<<endl;  
+    cout<<round<<" patterns simulated."<<endl;
     fecGroupPushToGate();
 
 }
@@ -146,6 +154,7 @@ void CirMgr::resetSim()
         (*ptr)->pattern.clear();
         (*ptr)->infecg = false;
     }
+    fecGroupInit();
 }
 
 
@@ -179,7 +188,7 @@ void CirMgr::fecGroupInit()
 
 
 
-void CirMgr::fecGroupUpdate()
+bool CirMgr::fecGroupUpdate()
 {
     unsigned n;
     if(A>100)
@@ -213,12 +222,14 @@ void CirMgr::fecGroupUpdate()
         }
     }
     }
-
     nfecGroupList->erase(remove_if(nfecGroupList->begin(),
                                    nfecGroupList->end(),
                                    fecGroupListEraser),
                          nfecGroupList->end());
+    bool r = (fecGroupList->size() != nfecGroupList->size());
+    
     fecGroupList = nfecGroupList;
+    return r;
 }
 
 void CirMgr::fecGroupPushToGate()

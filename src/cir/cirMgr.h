@@ -129,7 +129,7 @@ private:
    void resetSim();
    void randomAddPattern();
    void fecGroupInit();
-   void fecGroupUpdate();
+   bool fecGroupUpdate();
    void fecGroupPushToGate();
    static bool fecGroupListEraser(IdList i)
    {
