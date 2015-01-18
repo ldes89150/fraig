@@ -27,11 +27,11 @@ using namespace std;
 // {
 // public:
 //    HashKey() {}
-// 
+//
 //    size_t operator() () const { return 0; }
-// 
+//
 //    bool operator == (const HashKey& k) const { return true; }
-// 
+//
 // private:
 // };
 //
@@ -73,14 +73,14 @@ public:
           {
               subitr++;
               return (*this);
-          } 
+          }
           else
           {
               for(size_t i = n+1; i < nBucket; i++)
               {
                     if(bucketlist[i].size() != 0)
                     {
-                        n = i; 
+                        n = i;
                         subitr = bucketlist[n].begin();
                         return (*this);
                     }
@@ -88,7 +88,7 @@ public:
               n = nBucket -1;
               subitr = bucketlist[n].end();
               return (*this);
-          }  
+          }
       }
 
    private:
@@ -118,7 +118,7 @@ public:
    // return true if no valid data
    bool empty() const { return size() == 0; }
    // number of valid data
-   size_t size() const 
+   size_t size() const
    {
        size_t count = 0;
        for(size_t i = 0;i != _numBuckets;i++)
@@ -150,6 +150,13 @@ public:
    {
        _buckets[k() % _numBuckets].push_back(make_pair(k,d));
    }
+   void clear()
+   {
+       for(unsigned i = 0; i<_numBuckets;i++)
+       {
+           _buckets[i].clear();
+       }
+   }
 
 private:
    // Do not add any extra data member
@@ -172,14 +179,14 @@ private:
 // {
 // public:
 //    CacheKey() {}
-//    
+//
 //    size_t operator() () const { return 0; }
-//   
+//
 //    bool operator == (const CacheKey&) const { return true; }
-//       
+//
 // private:
-// }; 
-// 
+// };
+//
 template <class CacheKey, class CacheData>
 class Cache
 {

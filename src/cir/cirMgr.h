@@ -15,6 +15,8 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include "myHashMap.h"
+#include "cirGate.h"
 
 using namespace std;
 
@@ -30,7 +32,7 @@ public:
    CirMgr():simulate(false) {}
    ~CirMgr()
    {
-       
+
        CirGate * gate;
        if(gates==0)
            return;
@@ -41,7 +43,9 @@ public:
                delete gate;
        }
        delete gates;
-       delete fecGroupList;       
+       delete fecGroupList;
+       if(fecHashMap != 0)
+           delete fecHashMap;
    }
 
    // Access functions
@@ -110,11 +114,11 @@ private:
    map<unsigned,string> nameTable;
    void buildfanout();
    void buildDFSList();
-   
+
    CirGate** cirGateBegin()         {return gates;}
    CirGate** cirOutputGateBegin()   {return gates + (M+1);}
    CirGate** cirGateEnd()           {return gates + (M+O+1);}
-   
+
    void merge(CirGate* a, CirGate* b, bool invert ,string why);
    void checkhealth();
    void removeGate(unsigned gid);
@@ -122,10 +126,12 @@ private:
    //for simulation
    map<unsigned,vector<uint32_t> > patternPool;
    grouplist* fecGroupList;
-   
+   HashMap<CirGate::PatternKey,grouplist::iterator>* fecHashMap;
+
+
    bool simulate;
-   void gateSim(unsigned gid, unsigned round);
-   void roundSim(unsigned round);
+   void gateSim(unsigned gid, unsigned &round);
+   void roundSim(unsigned &round);
    void resetSim();
    void randomAddPattern();
    void fecGroupInit();
@@ -135,7 +141,7 @@ private:
    {
        return i.size()==1;
    }
-       
+
 };
 
 

@@ -456,6 +456,30 @@ CirMgr::printFloatGates() const
 void
 CirMgr::printFECPairs() const
 {
+    unsigned int count = 0;
+    CirGate* gate;
+    bool phase,phase2;
+    for(grouplist::iterator it = fecGroupList->begin();
+        it != fecGroupList->end();it++)
+    {
+        cout << "[" << count << "] ";
+        gate = getGate(*(it->begin()));
+        phase = *(gate->pattern.end()-1) %2 ==1;
+        for(IdList::iterator it2 = (*it).begin();it2 != it->end();)
+        {
+            gate = getGate(*it2);
+            phase2 = *(gate->pattern.end()-1) %2 ==1;
+            if(phase != phase2)
+                cout<<'!';
+            cout<< (*it2);
+            if(++it2 != it->end())
+            {
+                cout << " ";
+            }
+        }
+        cout << endl;
+        count++;
+    }
 }
 
 void
@@ -553,7 +577,7 @@ CirMgr::buildDFSList()
         if((*ptr) == 0)
             continue;
         (*ptr)->reachability = false;
-        
+
     }
     stack<unsigned> trace;
     unsigned gateID;
@@ -615,9 +639,9 @@ void CirMgr::checkhealth()
         for(std::vector<net> iterator itr = (*gate)->fanIn.begin();
             itr != (*gate)->fanIn.end(); itr++)
         {
-            
+
         }
-        
+
     }*/
     return;
 
@@ -634,7 +658,7 @@ void CirMgr::removeGate(unsigned gid)
     if(g == PO_GATE)
        O--;
     if(g == AIG_GATE)
-       A--; 
+       A--;
 
    delete (*ptr);
    (*ptr) = 0;

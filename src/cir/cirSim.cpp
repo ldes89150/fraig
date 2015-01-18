@@ -14,6 +14,7 @@
 #include "cirMgr.h"
 #include "cirGate.h"
 #include "util.h"
+#include <math.h>
 
 using namespace std;
 
@@ -39,16 +40,17 @@ CirMgr::randomSim()
         fecGroupInit();
     }
     resetSim();
+    unsigned maxFail = (unsigned)(3+ 3*(int)log((double) A));
     unsigned fail = 0;
     unsigned round;
-    for(round = 0; fail <3; round++)
+    for(round = 0; fail <maxFail; round++)
     {
         randomAddPattern();
         roundSim(round);
         if(not fecGroupUpdate())
             fail++;
     }
-    cout<<"MAX_FAIL = 3"<<endl;
+    cout<<"MAX_FAIL = "<<maxFail<<endl;
     cout<<round*32<<" patterns simulated."<<endl;
     fecGroupPushToGate();
     simulate = true;
@@ -144,7 +146,7 @@ CirMgr::fileSim(ifstream& patternFile)
 
 
 void
-CirMgr::roundSim(unsigned round)
+CirMgr::roundSim(unsigned &round)
 {
     for(vector<unsigned>::const_iterator itr = dfsList.begin();
             itr != dfsList.end(); itr++)
@@ -156,7 +158,7 @@ CirMgr::roundSim(unsigned round)
 
 
 void
-CirMgr::gateSim(unsigned gid, unsigned round)
+CirMgr::gateSim(unsigned gid, unsigned &round)
 {
     CirGate* gate = getGate(gid);
     assert(gate != 0);
@@ -248,6 +250,16 @@ void CirMgr::randomAddPattern()
 
 void CirMgr::fecGroupInit()
 {
+    unsigned n;
+    if(A>100)
+        n = A/2;
+    else
+        n = 100;
+    if(fecHashMap != 0)
+        delete fecHashMap;
+
+    fecHashMap = new HashMap<CirGate::PatternKey,grouplist::iterator>((size_t) n);
+
     grouplist*  nfecGroupList = new grouplist();
     CirGate* gate;
     IdList group;
@@ -268,25 +280,22 @@ void CirMgr::fecGroupInit()
 
 bool CirMgr::fecGroupUpdate()
 {
-    unsigned n;
-    if(A>100)
-        n = A/100;
-    else
-        n = 100;
-    HashMap<CirGate::PatternKey,grouplist::iterator> fecHashMap((size_t) n);
+    fecHashMap->clear();
     CirGate* gate;
     CirGate::PatternKey key;
     grouplist::iterator group;
     grouplist* nfecGroupList = new grouplist();
-    for(grouplist::iterator itr = fecGroupList->begin(); itr != fecGroupList->end(); itr++)
+    for(grouplist::iterator itr = fecGroupList->begin();
+            itr != fecGroupList->end(); itr++)
     {
+
         for(IdList::iterator ite = itr->begin();
-            ite != itr->end(); ite++)
+                ite != itr->end(); ite++)
         {
             gate = getGate(*ite);
             key = gate->getPatternKey();
             //cerr<<(*ite)<<' '<<key()<<' '<<key.pat<<endl;
-            if(fecHashMap.retrive(key,group))
+            if(fecHashMap->retrive(key,group))
             {
                 group->push_back(*ite);
             }
@@ -295,7 +304,7 @@ bool CirMgr::fecGroupUpdate()
                 nfecGroupList->push_back(IdList());
                 group = (--(nfecGroupList->end()));
                 group->push_back(*ite);
-                fecHashMap.quickInsert(key,group);
+                fecHashMap->quickInsert(key,group);
             }
         }
     }
@@ -307,7 +316,7 @@ bool CirMgr::fecGroupUpdate()
                          nfecGroupList->end());
     after = nfecGroupList->size();
     bool r = (before != after);
-
+    delete fecGroupList;
     fecGroupList = nfecGroupList;
     return r;
 }
@@ -316,10 +325,11 @@ void CirMgr::fecGroupPushToGate()
 {
     CirGate* gate;
     for(grouplist::iterator itr = fecGroupList->begin();
-        itr != fecGroupList->end(); itr++)
+            itr != fecGroupList->end(); itr++)
     {
+        std::sort(itr->begin(), itr->end());
         for(IdList::iterator ite = itr->begin();
-            ite != itr->end(); ite++)
+                ite != itr->end(); ite++)
         {
             //cout<<(*ite)<<' ';
             gate = getGate(*ite);
