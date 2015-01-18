@@ -318,8 +318,8 @@ bool CirMgr::fecGroupUpdate()
         itr++;
         if(itr == fecGroupList->end())
             break;
-        fecHashMap->init(itr->size()/10+10);
-        //fecHashMap->resize(itr->size()/10+10);
+        //fecHashMap->init(itr->size()/10+10);
+        fecHashMap->resize(itr->size()/10+10);
 
     }
     size_t before, after;
