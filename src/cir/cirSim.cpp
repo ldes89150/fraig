@@ -48,7 +48,7 @@ CirMgr::randomSim()
         if(not fecGroupUpdate())
             fail++;
     }
-    cout<<"MAX_FAIL = 3"<<endl;  
+    cout<<"MAX_FAIL = 3"<<endl;
     cout<<round*32<<" patterns simulated."<<endl;
     fecGroupPushToGate();
     simulate = true;
@@ -57,6 +57,82 @@ CirMgr::randomSim()
 void
 CirMgr::fileSim(ifstream& patternFile)
 {
+    if(not simulate)
+    {
+        fecGroupInit();
+    }
+    resetSim();
+
+
+    cout << "\n"; // mysterious \n in ref???
+    unsigned nSim = 0;
+    uint32_t *patbuff = new uint32_t[I];
+    for(unsigned i = 0;i<I;i++)
+    {
+        patbuff[i]=0;
+    }
+    while(true)
+    {
+        string curLine;
+        patternFile>>curLine;
+        if(curLine.length() != this->I)
+        {
+             if(!curLine.empty())
+             {
+                cerr << "\nError: Pattern(" << curLine <<  ") length(" << curLine.length()
+                     << ") does not match the number of inputs(" << this->I << ") in a circuit!!" << endl;
+             }
+             break;
+        }
+        size_t pos = 0;
+        // http://stackoverflow.com/questions/8888748/how-to-check-if-given-c-string-or-char-contains-only-digits
+        if((pos = curLine.find_first_not_of("01")) != string::npos)
+        {
+             cerr << "Error: Pattern(" << curLine << ") contains a non-0/1 character(\'"
+                  << curLine[pos] << "\')." << endl;
+             break;
+        }
+        for(unsigned int i = 0;i < this->I;i++)
+        {
+            unsigned long long int tmpBit = (curLine[i] == '1');
+            tmpBit <<= (nSim%32);
+            patbuff[i] += tmpBit; // http://stackoverflow.com/questions/5369770/bool-to-int-conversion
+        }
+        nSim++;
+        // start simulation
+        if(nSim%32 == 0)
+        {
+            for(unsigned i = 0; i<I;i++)
+            {
+                unsigned gid = PIs[i]/2;
+                patternPool[gid].push_back(patbuff[i]);
+            }
+        }
+        if(patternFile.eof())
+        {
+            break;
+        }
+    }
+    unsigned round =0;
+    unsigned roundMAX =nSim/32;
+    if(nSim%32 != 0)
+    {
+        roundMAX++;
+        for(unsigned i = 0; i<I;i++)
+        {
+            unsigned gid = PIs[i]/2;
+            patternPool[gid].push_back(patbuff[i]);
+        }
+    }
+    for(round = 0;round<roundMAX;round++)
+    {
+        randomAddPattern();
+        roundSim(round);
+        fecGroupUpdate();
+    }
+    cout << ((PIs.size() != 0 && POs.size() != 0)?nSim:0) << " patterns simulated." << endl;
+    fecGroupPushToGate();
+    simulate = true;
 }
 
 /*************************************************/
@@ -66,7 +142,7 @@ CirMgr::fileSim(ifstream& patternFile)
 
 
 
-    
+
 void
 CirMgr::roundSim(unsigned round)
 {
@@ -78,7 +154,7 @@ CirMgr::roundSim(unsigned round)
 }
 
 
-    
+
 void
 CirMgr::gateSim(unsigned gid, unsigned round)
 {
@@ -90,8 +166,8 @@ case AIG_GATE:
     {
     CirGate* pin1 = getGate(gate->fanIn[0].first);
     CirGate*pin2 = getGate(gate->fanIn[1].first);
-    unsigned pattern1, pattern2; 
-    if(pin1->gateType != UNDEF_GATE) 
+    unsigned pattern1, pattern2;
+    if(pin1->gateType != UNDEF_GATE)
         pattern1 = pin1->pattern[round];
     else
         pattern1 = 0;
@@ -106,7 +182,7 @@ case AIG_GATE:
 
     if(gate->fanIn[1].second)
         pattern2 = ~pattern2;
-    
+
     gate->pattern.push_back(pattern1 & pattern2);
     return;
     }
@@ -121,12 +197,12 @@ case PO_GATE:
     unsigned pattern;
     if(pin->gateType != UNDEF_GATE)
         pattern = pin->pattern[round];
-    else 
+    else
         pattern = 0;
 
     if(gate->fanIn[0].second)
         pattern = ~pattern;
-    
+
     gate->pattern.push_back(pattern);
     return;
     }
@@ -180,7 +256,7 @@ void CirMgr::fecGroupInit()
         gate = getGate(*itr);
         if(gate->gateType != AIG_GATE)
             continue;
-        
+
         group.push_back(*itr);
     }
     nfecGroupList->push_back(group);
@@ -197,8 +273,8 @@ bool CirMgr::fecGroupUpdate()
         n = A/100;
     else
         n = 100;
-    HashMap<CirGate::PatternKey,grouplist::iterator> fecHashMap((size_t) n); 
-    CirGate* gate; 
+    HashMap<CirGate::PatternKey,grouplist::iterator> fecHashMap((size_t) n);
+    CirGate* gate;
     CirGate::PatternKey key;
     grouplist::iterator group;
     grouplist* nfecGroupList = new grouplist();
@@ -232,7 +308,7 @@ bool CirMgr::fecGroupUpdate()
                          nfecGroupList->end());
     after = nfecGroupList->size();
     bool r = (before != after);
-    
+
     fecGroupList = nfecGroupList;
     return r;
 }
@@ -257,7 +333,3 @@ void CirMgr::fecGroupPushToGate()
     }
     }
 }
-
-
-
-
