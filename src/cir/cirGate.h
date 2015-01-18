@@ -101,7 +101,7 @@ public:
             fanin[0] = g->fanIn[0];
             fanin[1] = g->fanIn[1];
         }
-    
+
         ~FanInKey(){};
         size_t operator() () const
         {
@@ -110,11 +110,11 @@ public:
                 a = ~(fanin[0].first);
             else
                 a = fanin[0].first;
-    
+
             if(fanin[1].second)
                 b = ~(fanin[1].first);
             else
-                b = fanin[1].first;        
+                b = fanin[1].first;
             return a + b + (a%256)*(b%256);
         }
        bool operator == (const FanInKey& fk) const
@@ -127,7 +127,7 @@ public:
             fanin[0] = fk.fanin[0];
             fanin[1] = fk.fanin[1];
         }
-    
+
     private:
         net  fanin[2];
     };
@@ -164,13 +164,14 @@ protected:
    unsigned int id;
    unsigned int lineNo;
    bool reachability;
-   
-   vector<uint32_t> pattern;
+
+   //vector<uint32_t> pattern;
+   uint32_t pattern;
 
    bool infecg;
    bool fectype;
-   grouplist::iterator fecg; 
-   
+   grouplist::iterator fecg;
+
 
    void removeFanInID(unsigned cid)
    {
@@ -184,17 +185,17 @@ protected:
       fanOut.erase(remove_if(fanOut.begin(),
                             fanOut.end(),
                             netEraser(cid)),
-                   fanOut.end());      
+                   fanOut.end());
    }
 
    FanInKey getKey()
    {
-        return FanInKey(this);    
+        return FanInKey(this);
    }
-   
+
    PatternKey getPatternKey()
    {
-       uint32_t pat = *(pattern.end()-1);
+       uint32_t pat = pattern;
        if((pat % 2) == 1)
        {
            pat = ~pat;

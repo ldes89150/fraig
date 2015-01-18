@@ -44,7 +44,7 @@ CirMgr::sweep()
         if((*ptr)->reachability)
             continue;
         g = (*ptr)->gateType;
-        if(g == PI_GATE ) 
+        if(g == PI_GATE )
             continue;
         if(g == AIG_GATE)
         {
@@ -64,7 +64,7 @@ CirMgr::sweep()
                 {
                     c = true;
                     break;
-                }                
+                }
             }
             if(c) continue;
         }
@@ -81,6 +81,8 @@ CirMgr::sweep()
             itr != (*ptr)->fanIn.end(); itr++)
         {
             CirGate* gate = getGate(itr->first);
+            if(gate == 0)
+                continue;
             if(removeId.find(gate->id) == removeId.end())
                 continue;
             for(vector<net>::iterator ite = gate->fanOut.begin();
@@ -100,6 +102,7 @@ CirMgr::sweep()
 
         removePtr.pop();
     }
+    buildfanout();
 }
 
 void
@@ -113,17 +116,17 @@ CirMgr::optimize()
         ptr = gates + (*itr);
         if(*ptr == 0)
             continue;
-        
+
         if((*ptr)->gateType != AIG_GATE)
             continue;
-        
-        
+
+
         pinA = (*ptr)->fanIn[0];
         pinB = (*ptr)->fanIn[1];
-        
+
         //cout<<getGate(pinA.first)<<":"<<pinA.first<<" "<<pinA.second<<endl;
         //cout<<getGate(pinB.first)<<":"<<pinB.first<<" "<<pinB.second<<endl;
-        
+
         if(pinA.first == pinB.first)
         {
             if(pinA.second == pinB.second)
@@ -161,8 +164,9 @@ CirMgr::optimize()
         delete *ptr;
         *ptr = 0;
         A--;
-        
+
     }
+    buildfanout();
     buildDFSList();
 }
 
@@ -180,7 +184,7 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
     cout << why << ": " << b->id << " merging " ;
     if(invert)
         cout<<"!";
-        
+
     cout<<a->id<< "..." << endl;
 
 //ref: http://stackoverflow.com/questions/347441/erasing-elements-from-a-vector
@@ -189,18 +193,20 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
     {;
         getGate(itr->first)->removeFanOutID(a->id);
     }
-    
-    
+
+
     for(std::vector<net> ::iterator itr = a->fanOut.begin();
         itr != a->fanOut.end(); itr++)
     {
         CirGate* gate = getGate(itr->first);
+        if(gate==0)
+            continue;
         for(std::vector<net>::iterator ite = gate->fanIn.begin() ;
             ite != gate->fanIn.end();ite++)
         {
             if(ite->first != a->id)
                 continue;
-            
+
             ite->first = b->id;
             if(invert)
             {
@@ -212,8 +218,8 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
                 ite->second = ite->second;
                 b->fanOut.push_back(net(gate->id, ite->second));
             }
-            
+
         }
-        
+
     }
 }

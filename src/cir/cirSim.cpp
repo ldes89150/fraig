@@ -48,7 +48,14 @@ CirMgr::randomSim()
         randomAddPattern();
         roundSim(round);
         if(not fecGroupUpdate())
+        {
             fail++;
+        }
+        else
+        {
+            ;
+        }
+
     }
     cout<<"MAX_FAIL = "<<maxFail<<endl;
     cout<<round*32<<" patterns simulated."<<endl;
@@ -108,6 +115,7 @@ CirMgr::fileSim(ifstream& patternFile)
             {
                 unsigned gid = PIs[i]/2;
                 patternPool[gid].push_back(patbuff[i]);
+                patbuff[i]=0;
             }
         }
         if(patternFile.eof())
@@ -170,12 +178,12 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
         CirGate*pin2 = getGate(gate->fanIn[1].first);
         unsigned pattern1, pattern2;
         if(pin1->gateType != UNDEF_GATE)
-            pattern1 = pin1->pattern[round];
+            pattern1 = pin1->pattern;
         else
             pattern1 = 0;
 
         if(pin2->gateType != UNDEF_GATE)
-            pattern2 = pin2->pattern[round];
+            pattern2 = pin2->pattern;
         else
             pattern2 = 0;
 
@@ -185,12 +193,12 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
         if(gate->fanIn[1].second)
             pattern2 = ~pattern2;
 
-        gate->pattern.push_back(pattern1 & pattern2);
+        gate->pattern = (pattern1 & pattern2);
         return;
     }
     case PI_GATE:
     {
-        gate->pattern.push_back(patternPool[gid][round]);
+        gate->pattern = patternPool[gid][round];
         return;
     }
     case PO_GATE:
@@ -198,19 +206,19 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
         CirGate* pin = getGate(gate->fanIn[0].first);
         unsigned pattern;
         if(pin->gateType != UNDEF_GATE)
-            pattern = pin->pattern[round];
+            pattern = pin->pattern;
         else
             pattern = 0;
 
         if(gate->fanIn[0].second)
             pattern = ~pattern;
 
-        gate->pattern.push_back(pattern);
+        gate->pattern = pattern;
         return;
     }
     case CONST_GATE:
     {
-        gate->pattern.push_back(0);
+        gate->pattern = 0;
         return;
     }
     default:
@@ -232,7 +240,7 @@ void CirMgr::resetSim()
     {
         if(*ptr == 0)
             continue;
-        (*ptr)->pattern.clear();
+        (*ptr)->pattern = 0;
         (*ptr)->infecg = false;
     }
 }
@@ -263,6 +271,7 @@ void CirMgr::fecGroupInit()
     grouplist*  nfecGroupList = new grouplist();
     CirGate* gate;
     IdList group;
+    group.push_back(0);
     for(IdList::iterator itr = dfsList.begin(); itr != dfsList.end(); itr++)
     {
         gate = getGate(*itr);
@@ -289,6 +298,7 @@ bool CirMgr::fecGroupUpdate()
             itr != fecGroupList->end(); itr++)
     {
 
+        fecHashMap->init(itr->size()+10);
         for(IdList::iterator ite = itr->begin();
                 ite != itr->end(); ite++)
         {
@@ -307,18 +317,19 @@ bool CirMgr::fecGroupUpdate()
                 fecHashMap->quickInsert(key,group);
             }
         }
+
     }
     size_t before, after;
     before = nfecGroupList->size();
-    nfecGroupList->erase(remove_if(nfecGroupList->begin(),
+    nfecGroupList->remove_if(fecGroupListEraser);
+    /*nfecGroupList->erase(remove_if(nfecGroupList->begin(),
                                    nfecGroupList->end(),
                                    fecGroupListEraser),
-                         nfecGroupList->end());
+                         nfecGroupList->end());*/
     after = nfecGroupList->size();
-    bool r = (before != after);
     delete fecGroupList;
     fecGroupList = nfecGroupList;
-    return r;
+    return (before != after);
 }
 
 void CirMgr::fecGroupPushToGate()
@@ -335,7 +346,7 @@ void CirMgr::fecGroupPushToGate()
             gate = getGate(*ite);
             gate->infecg = true;
             gate->fecg = itr;
-            if(*(gate->pattern.end()-1) %2 ==1)
+            if((gate->pattern) %2 ==1)
                 gate->fectype=true;
             else
                 gate->fectype=false;

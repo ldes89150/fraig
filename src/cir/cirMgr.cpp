@@ -464,11 +464,11 @@ CirMgr::printFECPairs() const
     {
         cout << "[" << count << "] ";
         gate = getGate(*(it->begin()));
-        phase = *(gate->pattern.end()-1) %2 ==1;
+        phase = (gate->pattern) %2 ==1;
         for(IdList::iterator it2 = (*it).begin();it2 != it->end();)
         {
             gate = getGate(*it2);
-            phase2 = *(gate->pattern.end()-1) %2 ==1;
+            phase2 = (gate->pattern)  %2 ==1;
             if(phase != phase2)
                 cout<<'!';
             cout<< (*it2);
@@ -550,6 +550,14 @@ CirMgr::writeAag(ostream& outfile) const
 
 void CirMgr::buildfanout()
 {
+    for(CirGate** ptr= cirGateBegin();ptr != cirGateEnd(); ptr++)
+    {
+        if(*ptr != 0)
+        {
+            (*ptr)->fanOut.clear();
+        }
+    }
+
     for(unsigned i = 0; i != M+O+1; i++)
     {
         if(gates[i] != 0)

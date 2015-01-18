@@ -41,7 +41,7 @@ CirMgr::strash()
     HashMap<CirGate::FanInKey, unsigned> gatesHashMap((size_t) n);
     unsigned match;
     CirGate::FanInKey key;
-    CirGate* gate; 
+    CirGate* gate;
     for(vector<unsigned>::iterator itr = dfsList.begin();
         itr != dfsList.end(); itr++)
     {
@@ -61,6 +61,7 @@ CirMgr::strash()
             gatesHashMap.quickInsert(key,*itr);
         }
     }
+    buildfanout();
     this->buildDFSList();
 }
 
@@ -72,4 +73,3 @@ CirMgr::fraig()
 /********************************************/
 /*   Private member functions about fraig   */
 /********************************************/
-

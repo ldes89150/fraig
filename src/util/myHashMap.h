@@ -161,6 +161,7 @@ public:
 private:
    // Do not add any extra data member
    size_t                   _numBuckets;
+   size_t                   _numAllBuckets;
    vector<HashNode>*        _buckets;
 
    size_t bucketNum(const HashKey& k) const {

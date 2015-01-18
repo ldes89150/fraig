@@ -43,8 +43,8 @@ CirGate::reportGate() const
 
     pat<<"= Value: ";
     uint32_t lastSimValue;
-    if(not pattern.empty())
-        lastSimValue = *(pattern.end()-1);
+    if(pattern != 0)
+        lastSimValue = pattern;
     else
         lastSimValue = 0;
 
@@ -55,7 +55,7 @@ CirGate::reportGate() const
             pat<<'_';
     }
     pat<<string(49-pat.tellp(),' ')<<'=';
-    
+
     fec<<"= FECs:";
     if(infecg)
     {
@@ -71,7 +71,7 @@ CirGate::reportGate() const
         fec<<(*itr);
     }}
 
-    
+
     cout<<"=================================================="<<endl
         <<ss.str()<<endl
         <<fec.str()<<endl
@@ -202,4 +202,3 @@ unsigned get_pin(net l)
     else
         return l.first*2;
 }
-
