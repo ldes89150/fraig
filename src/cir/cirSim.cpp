@@ -175,7 +175,7 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
     case AIG_GATE:
     {
         CirGate* pin1 = getGate(gate->fanIn[0].first);
-        CirGate*pin2 = getGate(gate->fanIn[1].first);
+        CirGate* pin2 = getGate(gate->fanIn[1].first);
         unsigned pattern1, pattern2;
         if(pin1->gateType != UNDEF_GATE)
             pattern1 = pin1->pattern;
@@ -260,7 +260,7 @@ void CirMgr::fecGroupInit()
 {
     unsigned n;
     if(A>100)
-        n = A/2;
+        n = A/10+100;
     else
         n = 100;
     if(fecHashMap != 0)
@@ -295,10 +295,8 @@ bool CirMgr::fecGroupUpdate()
     grouplist::iterator group;
     grouplist* nfecGroupList = new grouplist();
     for(grouplist::iterator itr = fecGroupList->begin();
-            itr != fecGroupList->end(); itr++)
+            ;)
     {
-
-        fecHashMap->init(itr->size()+10);
         for(IdList::iterator ite = itr->begin();
                 ite != itr->end(); ite++)
         {
@@ -317,6 +315,11 @@ bool CirMgr::fecGroupUpdate()
                 fecHashMap->quickInsert(key,group);
             }
         }
+        itr++;
+        if(itr == fecGroupList->end())
+            break;
+        fecHashMap->init(itr->size()/10+10);
+        //fecHashMap->resize(itr->size()/10+10);
 
     }
     size_t before, after;

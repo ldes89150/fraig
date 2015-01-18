@@ -99,15 +99,34 @@ public:
    };
 
    void init(size_t b) {
-      reset(); _numBuckets = b; _buckets = new vector<HashNode>[b]; }
+      reset(); _numBuckets = b; _buckets = new vector<HashNode>[b];
+      _numAllBuckets = _numBuckets;}
    void reset() {
       _numBuckets = 0;
       if (_buckets) { delete [] _buckets; _buckets = 0; }
+      _numAllBuckets = _numBuckets;
    }
    size_t numBuckets() const { return _numBuckets; }
 
    vector<HashNode>& operator [] (size_t i) { return _buckets[i]; }
    const vector<HashNode>& operator [](size_t i) const { return _buckets[i]; }
+
+   bool resize(size_t b)
+   {
+       if(b>=_numAllBuckets)
+           init(b);
+       else
+       {
+           _numBuckets = b;
+
+           for(unsigned i =0; i <b; i++)
+           {
+               _buckets[i].clear();
+           }
+       }
+
+   }
+
 
    // TODO: implement these functions
    //

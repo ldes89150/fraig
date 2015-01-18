@@ -137,7 +137,7 @@ private:
    void fecGroupInit();
    bool fecGroupUpdate();
    void fecGroupPushToGate();
-   static bool fecGroupListEraser(IdList i)
+   static bool fecGroupListEraser(const IdList &i)
    {
        return i.size()==1;
    }
