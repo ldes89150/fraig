@@ -35,7 +35,9 @@ void
 CirMgr::randomSim()
 {
     if(not simulate)
+    {
         fecGroupInit();
+    }
     resetSim();
     unsigned fail = 0;
     unsigned round;
@@ -47,8 +49,9 @@ CirMgr::randomSim()
             fail++;
     }
     cout<<"MAX_FAIL = 3"<<endl;  
-    cout<<round<<" patterns simulated."<<endl;
+    cout<<round*32<<" patterns simulated."<<endl;
     fecGroupPushToGate();
+    simulate = true;
 }
 
 void
@@ -221,11 +224,14 @@ bool CirMgr::fecGroupUpdate()
         }
     }
     }
+    size_t before, after;
+    before = nfecGroupList->size();
     nfecGroupList->erase(remove_if(nfecGroupList->begin(),
                                    nfecGroupList->end(),
                                    fecGroupListEraser),
                          nfecGroupList->end());
-    bool r = (fecGroupList->size() != nfecGroupList->size());
+    after = nfecGroupList->size();
+    bool r = (before != after);
     
     fecGroupList = nfecGroupList;
     return r;
@@ -240,7 +246,7 @@ void CirMgr::fecGroupPushToGate()
     for(IdList::iterator ite = itr->begin();
         ite != itr->end();ite++)
     {
-        cout<<(*ite)<<' ';
+        //cout<<(*ite)<<' ';
         gate = getGate(*ite);
         gate->infecg = true;
         gate->fecg = itr;
