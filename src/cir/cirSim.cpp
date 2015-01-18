@@ -35,7 +35,8 @@ void
 CirMgr::randomSim()
 {
     if(not simulate)
-        resetSim();
+        fecGroupInit();
+    resetSim();
     unsigned fail = 0;
     unsigned round;
     for(round = 0;fail <3;round++)
@@ -48,7 +49,6 @@ CirMgr::randomSim()
     cout<<"MAX_FAIL = 3"<<endl;  
     cout<<round<<" patterns simulated."<<endl;
     fecGroupPushToGate();
-
 }
 
 void
@@ -154,7 +154,6 @@ void CirMgr::resetSim()
         (*ptr)->pattern.clear();
         (*ptr)->infecg = false;
     }
-    fecGroupInit();
 }
 
 
@@ -208,7 +207,7 @@ bool CirMgr::fecGroupUpdate()
     {
         gate = getGate(*ite);
         key = gate->getPatternKey();
-        cerr<<(*ite)<<' '<<key()<<' '<<key.pat<<endl;
+        //cerr<<(*ite)<<' '<<key()<<' '<<key.pat<<endl;
         if(fecHashMap.retrive(key,group))
         {
             group->push_back(*ite);
