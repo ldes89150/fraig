@@ -13,6 +13,8 @@
 #include "myHashMap.h"
 #include <utility>
 #include <stdint.h>
+#include <list>
+#include <algorithm>
 
 
 using namespace std;
@@ -26,6 +28,7 @@ class SatSolver;
 typedef vector<CirGate*>           GateList;
 typedef vector<unsigned>           IdList;
 
+typedef list<vector<unsigned> > grouplist;
 
 enum GateType
 {

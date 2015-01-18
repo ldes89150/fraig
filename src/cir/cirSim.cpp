@@ -34,8 +34,13 @@ using namespace std;
 void
 CirMgr::randomSim()
 {
+    resetSim();
+    fecGroupInit();
     randomAddPattern();
     roundSim(0);
+    fecGroupUpdate();
+    fecGroupPushToGate();
+
 }
 
 void
@@ -139,6 +144,7 @@ void CirMgr::resetSim()
         if(*ptr == 0)
             continue;
         (*ptr)->pattern.clear();
+        (*ptr)->infecg = false;
     }
 }
 
@@ -152,6 +158,89 @@ void CirMgr::randomAddPattern()
     }
 }
 
+
+void CirMgr::fecGroupInit()
+{
+    grouplist*  nfecGroupList = new grouplist();
+    CirGate* gate;
+    IdList group;
+    for(IdList::iterator itr = dfsList.begin();itr != dfsList.end();itr++)
+    {
+        gate = getGate(*itr);
+        if(gate->gateType != AIG_GATE)
+            continue;
+        
+        group.push_back(*itr);
+    }
+    nfecGroupList->push_back(group);
+    fecGroupList = nfecGroupList;
+}
+
+
+
+
+void CirMgr::fecGroupUpdate()
+{
+    unsigned n;
+    if(A>100)
+        n = A/100;
+    else
+        n = 100;
+    HashMap<CirGate::PatternKey,grouplist::iterator> fecHashMap((size_t) n); 
+    CirGate* gate; 
+    CirGate::PatternKey key;
+    grouplist::iterator group;
+    grouplist* nfecGroupList = new grouplist();
+    for(grouplist::iterator itr = fecGroupList->begin();
+        itr != fecGroupList->end(); itr++)
+    {
+    for(IdList::iterator ite = itr->begin();
+        ite != itr->end();ite++)
+    {
+        gate = getGate(*ite);
+        key = gate->getPatternKey();
+        cerr<<(*ite)<<' '<<key()<<' '<<key.pat<<endl;
+        if(fecHashMap.retrive(key,group))
+        {
+            group->push_back(*ite);
+        }
+        else
+        {
+            nfecGroupList->push_back(IdList());
+            group = (--(nfecGroupList->end()));
+            group->push_back(*ite);
+            fecHashMap.quickInsert(key,group);
+        }
+    }
+    }
+
+    nfecGroupList->erase(remove_if(nfecGroupList->begin(),
+                                   nfecGroupList->end(),
+                                   fecGroupListEraser),
+                         nfecGroupList->end());
+    fecGroupList = nfecGroupList;
+}
+
+void CirMgr::fecGroupPushToGate()
+{
+    CirGate* gate;
+    for(grouplist::iterator itr = fecGroupList->begin();
+        itr != fecGroupList->end(); itr++)
+    {
+    for(IdList::iterator ite = itr->begin();
+        ite != itr->end();ite++)
+    {
+        cout<<(*ite)<<' ';
+        gate = getGate(*ite);
+        gate->infecg = true;
+        gate->fecg = itr;
+        if(*(gate->pattern.end()-1) %2 ==1)
+            gate->fectype=true;
+        else
+            gate->fectype=false;
+    }
+    }
+}
 
 
 

@@ -31,7 +31,7 @@ extern CirMgr *cirMgr;
 void
 CirGate::reportGate() const
 {
-    stringstream ss, pat;
+    stringstream ss, pat, fec;
     string gname = cirMgr->getGateName(id);
     ss<<"= "<<CirGate::gateTypeStr(gateType)<<'('<<id<<')';
     if(not gname.empty())
@@ -56,9 +56,25 @@ CirGate::reportGate() const
     }
     pat<<string(49-pat.tellp(),' ')<<'=';
     
+    fec<<"= FECs:";
+    if(infecg)
+    {
+    for(IdList::iterator itr = fecg->begin();
+        itr != fecg->end();itr++)
+    {
+        CirGate* gate = cirMgr->getGate(*itr);
+        if(gate->id == this->id)
+            continue;
+        fec<<' ';
+        if(gate->fectype != this->fectype)
+            fec<<'!';
+        fec<<(*itr);
+    }}
+
     
     cout<<"=================================================="<<endl
         <<ss.str()<<endl
+        <<fec.str()<<endl
         <<pat.str()<<endl
         <<"=================================================="<<endl;
 }

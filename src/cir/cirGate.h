@@ -49,8 +49,8 @@ public:
    unsigned getLineNo() const { return 0; }
 
 
-   CirGate() : reachability(false){}
-   CirGate(enum GateType gateType,unsigned int id,unsigned lineNo):gateType(gateType),id(id), lineNo(lineNo), reachability(false){}
+   CirGate() : reachability(false),infecg(false){}
+   CirGate(enum GateType gateType,unsigned int id,unsigned lineNo):gateType(gateType),id(id), lineNo(lineNo), reachability(false),infecg(false){}
    ~CirGate() {}
 
    // Printing functions
@@ -131,7 +131,27 @@ public:
     private:
         net  fanin[2];
     };
+    class PatternKey
+    {
+    public:
+        PatternKey(){}
+        PatternKey(uint32_t pat):pat(pat){}
+        ~PatternKey(){}
+        bool operator == (const PatternKey& k) const
+        {
+            return (pat == k.pat);
+        }
 
+        size_t operator() () const
+        {
+            return (size_t) pat;
+        }
+        void operator = (const PatternKey& k)
+        {
+            pat = k.pat;
+        }
+        uint32_t pat;
+    };
 private:
    void printUndef(unsigned inden, bool inverse, unsigned undefID) const;
    void printFanIn(unsigned inden, int level, bool inverse, set<unsigned>* &reported) const;
@@ -146,6 +166,11 @@ protected:
    bool reachability;
    
    vector<uint32_t> pattern;
+
+   bool infecg;
+   bool fectype;
+   grouplist::iterator fecg; 
+   
 
    void removeFanInID(unsigned cid)
    {
@@ -165,6 +190,19 @@ protected:
    FanInKey getKey()
    {
         return FanInKey(this);    
+   }
+   
+   PatternKey getPatternKey()
+   {
+       uint32_t pat = *(pattern.end()-1);
+       if((pat % 2) == 1)
+       {
+           pat = ~pat;
+       }
+       //cout<<pattern.size()<<"generate key:"<<pat<<endl;
+       PatternKey key;
+       key.pat =pat;
+       return key;
    }
 };
 

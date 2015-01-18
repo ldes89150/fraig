@@ -27,7 +27,7 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr() {}
+   CirMgr():simulate(false) {}
    ~CirMgr()
    {
        
@@ -41,7 +41,7 @@ public:
                delete gate;
        }
        delete gates;
-       
+       delete fecGroupList;       
    }
 
    // Access functions
@@ -121,14 +121,22 @@ private:
 
    //for simulation
    map<unsigned,vector<uint32_t> > patternPool;
-
-
+   grouplist* fecGroupList;
+   
+   bool simulate;
    void gateSim(unsigned gid, unsigned round);
    void roundSim(unsigned round);
    void resetSim();
    void randomAddPattern();
+   void fecGroupInit();
+   void fecGroupUpdate();
+   void fecGroupPushToGate();
+   static bool fecGroupListEraser(IdList i)
+   {
+       return i.size()==1;
+   }
+       
 };
-
 
 
 
