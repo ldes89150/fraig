@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #define CHECK_HEALTH 1
+#define PRINT_PROVING_RESULT 1
 
 using namespace std;
 

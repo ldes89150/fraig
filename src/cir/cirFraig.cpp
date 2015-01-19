@@ -145,19 +145,25 @@ bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
     if(gid1 == 0)
     {
         //might have problem
-        cout << "\nProving " << gid2 << " = " << (invert ?"false":"true") << "...";
+        #if PRINT_PROVING_RESULT
+        cout << "Proving " << gid2 << " = " << (invert ?"false":"true") << "...";
+        #endif
         satSolver->assumeProperty(gate2->satVar,~invert);
     }
     else
     {
-        cout << "\nProving (" << gid1 << ", "
+        #if PRINT_PROVING_RESULT
+        cout << "Proving (" << gid1 << ", "
              << (invert ? "":"!") << gid2 << ")...";
+        #endif
         Var f = satSolver->newVar();
         satSolver->addXorCNF(f, gate1->satVar, false, gate2->satVar, invert);
         satSolver->assumeProperty(f, true);
     }
     bool result = satSolver->assumpSolve();
+    #if PRINT_PROVING_RESULT
     cout << (result?"SAT!!":"UNSAT!!")<<endl;
+    #endif
     return result;
 }
 
