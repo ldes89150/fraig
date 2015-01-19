@@ -94,9 +94,10 @@ CirMgr::fileSim(ifstream& patternFile)
                 nSim = 0;
                 cout << 0 << " patterns simulated." << endl;
                 simulate = false;
+                return;
             }
 
-            return;
+            break;
         }
         size_t pos = 0;
         // http://stackoverflow.com/questions/8888748/how-to-check-if-given-c-string-or-char-contains-only-digits

@@ -80,13 +80,13 @@ public:
 void
 CirMgr::fraig()
 {
-    if(not simulate)
-        return;
     bool invert;
     unsigned ref;
     fecEraser eraser;
     typedef std::vector<fraigTask> taskList;
     taskList task;
+    if(fecGroupList == 0)
+        return;
     for(grouplist::iterator itr = fecGroupList->begin();
         itr != fecGroupList->end(); itr++)
     {
