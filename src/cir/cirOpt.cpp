@@ -213,12 +213,11 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
             ite->first = b->id;
             if(invert)
             {
-                ite->second = ~ite->second;
+                ite->second = not ite->second;
                 b->fanOut.push_back(net(gate->id, ite->second));
             }
             else
             {
-                ite->second = ite->second;
                 b->fanOut.push_back(net(gate->id, ite->second));
             }
 
