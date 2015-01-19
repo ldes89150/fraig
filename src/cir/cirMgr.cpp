@@ -456,6 +456,8 @@ CirMgr::printFloatGates() const
 void
 CirMgr::printFECPairs() const
 {
+    if(not simulate)
+        return;
     unsigned int count = 0;
     CirGate* gate;
     bool phase,phase2;

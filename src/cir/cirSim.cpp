@@ -194,12 +194,12 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
             pattern2 = ~pattern2;
 
         gate->pattern = (pattern1 & pattern2);
-        return;
+        break;
     }
     case PI_GATE:
     {
         gate->pattern = patternPool[gid][round];
-        return;
+        break;
     }
     case PO_GATE:
     {
@@ -214,18 +214,19 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
             pattern = ~pattern;
 
         gate->pattern = pattern;
-        return;
+        break;
     }
     case CONST_GATE:
     {
         gate->pattern = 0;
-        return;
+        break;
     }
     default:
     {
         assert(false);
     }
     };
+    gate->phase = (gate->pattern % 2 ==1);
 }
 
 

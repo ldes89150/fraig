@@ -167,6 +167,7 @@ protected:
 
    //vector<uint32_t> pattern;
    uint32_t pattern;
+   bool phase;
 
    bool infecg;
    bool fectype;

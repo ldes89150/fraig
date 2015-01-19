@@ -89,7 +89,7 @@ bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
     CirGate* gate2 = getGate(gid2);
     satSolver->assumeRelease();
     satSolver->assumeProperty(gate1->satVar,false);
-    invert = (gate1->pattern != gate2->pattern);
+    invert = (gate1->phase != gate2->phase);
 
     if(gid1 == 0)
     {

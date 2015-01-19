@@ -29,7 +29,7 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr():simulate(false) {}
+   CirMgr():simulate(false), _simLog(0), satSolver(0), fecGroupList(0) {}
    ~CirMgr()
    {
 
