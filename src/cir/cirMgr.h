@@ -29,7 +29,15 @@ extern CirMgr *cirMgr;
 class CirMgr
 {
 public:
-   CirMgr():simulate(false), _simLog(0), satSolver(0), fecGroupList(0) {}
+   CirMgr()
+   {
+       simulate = false;
+       _simLog = 0;
+       satSolver = 0;
+       fecGroupList = 0;
+       gates = 0;
+       fecHashMap = 0;
+   }
    ~CirMgr()
    {
 
@@ -146,7 +154,7 @@ private:
    SatSolver* satSolver;
    void satInitialize();
    bool solveBySat(unsigned gid1, unsigned gid2, bool &inPhase);
-   
+
 };
 
 class fecEraser
