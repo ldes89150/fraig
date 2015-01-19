@@ -148,6 +148,15 @@ private:
    bool solveBySat(unsigned gid1, unsigned gid2, bool &inPhase);
 };
 
-
+class fecEraser
+{
+public:
+    set<unsigned> toRemove;
+    bool operator () (unsigned g) const
+    {
+        return toRemove.find(g) == toRemove.end();
+    }
+    
+};
 
 #endif // CIR_MGR_H

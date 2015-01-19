@@ -15,6 +15,7 @@
 
 using namespace std;
 
+class fecEraser;
 // TODO: Please keep "CirMgr::strash()" and "CirMgr::fraig()" for cir cmd.
 //       Feel free to define your own variables or functions
 
@@ -65,20 +66,68 @@ CirMgr::strash()
     this->buildDFSList();
 }
 
+
+class fraigTask
+{
+public:
+    fraigTask(unsigned p, unsigned m, bool i):
+    parent(p), merge(m), invert(i){}
+    
+    unsigned parent;
+    unsigned merge;
+    bool invert;
+};
+
+
+
 void
 CirMgr::fraig()
 {
     bool invert;
-    solveBySat((*(fecGroupList->begin()))[0],(*(fecGroupList->begin()))[1],invert);
-    cout<<(invert?'t':'f');
-    solveBySat(8,1,invert);
-    cout<<(invert?'t':'f');
+    unsigned ref;
+    fecEraser eraser;
+    typedef std::vector<fraigTask> taskList;
+    taskList task;
+    for(grouplist::iterator itr = fecGroupList->begin();
+        itr != fecGroupList->end(); itr++)
+    {
+        do
+        {
+            eraser.toRemove.clear();
+            ref = (*itr)[0];
+            eraser.toRemove.insert(ref);
+            for(IdList::iterator ite = itr->begin()+1;
+                ite != itr->end();ite++)
+            {
+                if(not solveBySat(ref,*ite,invert))
+                {
+                    eraser.toRemove.insert(ref);
+                    task.push_back(fraigTask(ref,*ite,invert));
+                }
+            }
+            itr->erase(remove_if(itr->begin(),
+                                 itr->end(),
+                                 eraser),
+                       itr->end());
+        }while(itr->size() > 1);
+    }
+    
+    for(taskList::iterator itr = task.begin();
+        itr != task.end();itr++)
+    {
+        merge(getGate(itr->merge),
+              getGate(itr->parent),
+              itr->invert, "Fraig");
+    }
+    cout<<"fin";
+    buildfanout();
+    buildDFSList();
+    
 }
 
 /********************************************/
 /*   Private member functions about fraig   */
 /********************************************/
-
 
 bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
 {
@@ -106,7 +155,7 @@ bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
         satSolver->assumeProperty(f, true);
     }
     bool result = satSolver->assumpSolve();
-    cout << (result?"SAT!!":"UNSAT!!");
+    cout << (result?"SAT!!":"UNSAT!!")<<endl;
     return result;
 }
 
