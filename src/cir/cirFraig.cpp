@@ -145,8 +145,8 @@ bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
     if(gid1 == 0)
     {
         //might have problem
-        cout << "\nProving " << gid2 << " = " << (invert ?"0":"1") << "...";
-        satSolver->assumeProperty(gate2->satVar,invert);
+        cout << "\nProving " << gid2 << " = " << (invert ?"false":"true") << "...";
+        satSolver->assumeProperty(gate2->satVar,~invert);
     }
     else
     {

@@ -237,7 +237,4 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
     }
     delete a;
     *(gates+(a->id)) = 0;
-    #if CHECK_HEALTH
-    checkhealth();
-    #endif
 }
