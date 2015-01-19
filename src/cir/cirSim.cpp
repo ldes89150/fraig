@@ -139,7 +139,7 @@ CirMgr::fileSim(ifstream& patternFile)
     {
         randomAddPattern();
 
-        if(round == roundMAX-1)
+        if(round == roundMAX-1 and nSim%32 !=0)
             roundSim(round, nSim%32);
         else
             roundSim(round);
@@ -162,6 +162,11 @@ CirMgr::fileSim(ifstream& patternFile)
 void
 CirMgr::roundSim(unsigned &round, unsigned bitPerRound)
 {
+    CirGate* gate;
+    for(IdList::iterator itr = PIs.begin();itr != PIs.end();itr++)
+    {
+        gateSim(*itr /2, round);
+    }
     for(vector<unsigned>::const_iterator itr = dfsList.begin();
             itr != dfsList.end(); itr++)
     {
@@ -173,7 +178,6 @@ CirMgr::roundSim(unsigned &round, unsigned bitPerRound)
     unsigned poCount = 0;
     if(_simLog)
     {
-        CirGate* gate;
         for(IdList::iterator itr = PIs.begin();itr != PIs.end();itr++)
         {
             gate = getGate(*itr /2);
