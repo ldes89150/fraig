@@ -142,6 +142,10 @@ private:
        return i.size()==1;
    }
 
+   //for fraig
+   SatSolver* satSolver;
+   void satInitialize();
+   bool solveBySat(unsigned gid1, unsigned gid2, bool &inPhase);
 };
 
 

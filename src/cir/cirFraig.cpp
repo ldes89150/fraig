@@ -68,8 +68,74 @@ CirMgr::strash()
 void
 CirMgr::fraig()
 {
+    bool invert;
+    solveBySat((*(fecGroupList->begin()))[0],(*(fecGroupList->begin()))[1],invert);
+    cout<<(invert?'t':'f');
+    solveBySat(8,1,invert);
+    cout<<(invert?'t':'f');
 }
 
 /********************************************/
 /*   Private member functions about fraig   */
 /********************************************/
+
+
+bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
+{
+    if(satSolver == 0)
+        satInitialize();
+
+    CirGate* gate1 = getGate(gid1);
+    CirGate* gate2 = getGate(gid2);
+    satSolver->assumeRelease();
+    satSolver->assumeProperty(gate1->satVar,false);
+    invert = (gate1->pattern != gate2->pattern);
+
+    if(gid1 == 0)
+    {
+        //might have problem
+        cout << "\nProving " << gid2 << " = " << (invert ?"0":"1") << "...";
+        satSolver->assumeProperty(gate2->satVar,invert);
+    }
+    else
+    {
+        cout << "\nProving (" << gid1 << ", "
+             << (invert ? "":"!") << gid2 << ")...";
+        Var f = satSolver->newVar();
+        satSolver->addXorCNF(f, gate1->satVar, false, gate2->satVar, invert);
+        satSolver->assumeProperty(f, true);
+    }
+    bool result = satSolver->assumpSolve();
+    cout << (result?"SAT!!":"UNSAT!!");
+    return result;
+}
+
+
+
+void CirMgr::satInitialize()
+{
+    if(satSolver != 0)
+        return;
+    this->satSolver = new SatSolver();
+    satSolver->initialize();
+    CirGate* gate;
+    gate = getGate(0);
+    gate->satVar = satSolver->newVar();
+    for(IdList::const_iterator itr = dfsList.begin();
+        itr != dfsList.end();itr++)
+    {
+        gate = getGate(*itr);
+        if(gate->gateType != AIG_GATE and
+           gate->gateType != PI_GATE)
+        {
+           continue;
+        }
+        gate->satVar = satSolver->newVar();
+        if(gate->gateType == AIG_GATE)
+        {
+            satSolver -> addAigCNF(gate->satVar,
+            getGate(gate->fanIn[0].first)->satVar,gate->fanIn[0].second,
+            getGate(gate->fanIn[1].first)->satVar,gate->fanIn[1].second);
+        }
+    }
+}

@@ -172,6 +172,8 @@ protected:
    bool fectype;
    grouplist::iterator fecg;
 
+   //for sat
+   Var satVar;
 
    void removeFanInID(unsigned cid)
    {
