@@ -103,6 +103,10 @@ CirMgr::sweep()
         removePtr.pop();
     }
     buildfanout();
+
+    #if CHECK_HEALTH
+    checkhealth();
+    #endif
 }
 
 void
@@ -161,11 +165,11 @@ CirMgr::optimize()
             }}
         }
         //cout<<"delete:"<<(*ptr)->id<<endl;
-        delete *ptr;
-        *ptr = 0;
-        A--;
 
     }
+    #if CHECK_HEALTH
+    checkhealth();
+    #endif
     buildfanout();
     buildDFSList();
 }
@@ -190,10 +194,9 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
 //ref: http://stackoverflow.com/questions/347441/erasing-elements-from-a-vector
     for(std::vector<net> ::iterator itr = a->fanIn.begin();
         itr != a->fanIn.end(); itr++)
-    {;
+    {
         getGate(itr->first)->removeFanOutID(a->id);
     }
-
 
     for(std::vector<net> ::iterator itr = a->fanOut.begin();
         itr != a->fanOut.end(); itr++)
@@ -210,8 +213,8 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
             ite->first = b->id;
             if(invert)
             {
-                ite->second = not ite->second;
-                b->fanOut.push_back(net(gate->id, not ite->second));
+                ite->second = ~ite->second;
+                b->fanOut.push_back(net(gate->id, ite->second));
             }
             else
             {
@@ -222,4 +225,19 @@ CirMgr::merge(CirGate* a, CirGate* b, bool invert ,string why)
         }
 
     }
+    switch(a->gateType)
+    {
+        case AIG_GATE:
+            A--;
+            break;
+        case UNDEF_GATE:
+            break;
+        default:
+            assert(false);
+    }
+    delete a;
+    *(gates+(a->id)) = 0;
+    #if CHECK_HEALTH
+    checkhealth();
+    #endif
 }

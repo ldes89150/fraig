@@ -72,7 +72,7 @@ class fraigTask
 public:
     fraigTask(unsigned p, unsigned m, bool i):
     parent(p), merge(m), invert(i){}
-    
+
     unsigned parent;
     unsigned merge;
     bool invert;
@@ -111,7 +111,7 @@ CirMgr::fraig()
                        itr->end());
         }while(itr->size() > 1);
     }
-    
+
     for(taskList::iterator itr = task.begin();
         itr != task.end();itr++)
     {
@@ -119,10 +119,12 @@ CirMgr::fraig()
               getGate(itr->parent),
               itr->invert, "Fraig");
     }
-    cout<<"fin";
+    #if CHECK_HEALTH
+    checkhealth();
+    #endif
     buildfanout();
     buildDFSList();
-    
+
 }
 
 /********************************************/

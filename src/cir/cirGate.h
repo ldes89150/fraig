@@ -86,7 +86,7 @@ public:
       unsigned id;
       bool operator()(net i) const
       {
-         return i.first != id;
+         return i.first == id;
       }
    };
    class FanInKey

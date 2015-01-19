@@ -146,6 +146,7 @@ private:
    SatSolver* satSolver;
    void satInitialize();
    bool solveBySat(unsigned gid1, unsigned gid2, bool &inPhase);
+   
 };
 
 class fecEraser
@@ -156,7 +157,7 @@ public:
     {
         return toRemove.find(g) == toRemove.end();
     }
-    
+
 };
 
 #endif // CIR_MGR_H

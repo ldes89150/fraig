@@ -323,6 +323,9 @@ CirMgr::readCircuit(const string& fileName)
         patternPool[*itr /2] = vector<unsigned>();
 
     }
+    #if CHECK_HEALTH
+    checkhealth();
+    #endif
 
 
     return true;
@@ -641,20 +644,45 @@ CirMgr::buildDFSList()
 
 void CirMgr::checkhealth()
 {
-    /*
+    cerr<<"==================start checking========================="<<endl;
+    CirGate* target;
+    bool phase;
     for(CirGate** gate = cirGateBegin(); gate != cirGateEnd(); gate++)
     {
         if(*gate == 0)
             continue;
-        for(std::vector<net> iterator itr = (*gate)->fanIn.begin();
+        for(std::vector<net>::iterator itr = (*gate)->fanIn.begin();
             itr != (*gate)->fanIn.end(); itr++)
         {
-
+            target = getGate(itr->first);
+            if(target == 0)
+            {
+                cerr<<(*gate)->id<<" s fanIn "<<itr->first<<" doesnt exist"<<endl;
+                continue;
+            }
+            phase = itr->second;
+            if(std::find(target->fanOut.begin(), target->fanOut.end(), net((*gate)->id, itr->second))
+                == target->fanOut.end())
+                cerr<<(*gate)->id<<" is not in "<<target->id<<" s fanOut"<<endl;
+        }
+        for(std::vector<net>::iterator itr = (*gate)->fanOut.begin();
+            itr != (*gate)->fanOut.end(); itr++)
+        {
+            target = getGate(itr->first);
+            if(target == 0)
+            {
+                cerr<<(*gate)->id<<" s fanOut "<<itr->first<<" doesnt exist"<<endl;
+                continue;
+            }
+            phase = itr->second;
+            if(std::find(target->fanIn.begin(), target->fanIn.end(), net((*gate)->id, itr->second))
+                == target->fanOut.end())
+                cerr<<(*gate)->id<<" is not in "<<target->id<<" s fanIn"<<endl;
         }
 
-    }*/
+    }
+    cerr<<"========================================================="<<endl;
     return;
-
 }
 
 void CirMgr::removeGate(unsigned gid)

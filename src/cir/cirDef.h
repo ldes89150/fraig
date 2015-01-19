@@ -16,6 +16,7 @@
 #include <list>
 #include <algorithm>
 
+#define CHECK_HEALTH 1
 
 using namespace std;
 

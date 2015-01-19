@@ -40,7 +40,8 @@ CirMgr::randomSim()
         fecGroupInit();
     }
     resetSim();
-    unsigned maxFail = (unsigned)(3+ 3*(int)log((double) A));
+    unsigned maxFail = (unsigned)(3+ 3*(int)log((double)(A+I+O)));
+    cout<<"MAX_FAIL = "<<maxFail<<endl;
     unsigned fail = 0;
     unsigned round;
     for(round = 0; fail <maxFail; round++)
@@ -57,7 +58,7 @@ CirMgr::randomSim()
         }
 
     }
-    cout<<"MAX_FAIL = "<<maxFail<<endl;
+
     cout<<round*32<<" patterns simulated."<<endl;
     fecGroupPushToGate();
     simulate = true;
@@ -203,8 +204,13 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
     }
     case PO_GATE:
     {
-        CirGate* pin = getGate(gate->fanIn[0].first);
         unsigned pattern;
+        if(gate->fanIn.empty())
+        {
+            pattern = 0;
+            break;
+        }
+        CirGate* pin = getGate(gate->fanIn[0].first);
         if(pin->gateType != UNDEF_GATE)
             pattern = pin->pattern;
         else
@@ -290,13 +296,18 @@ void CirMgr::fecGroupInit()
 
 bool CirMgr::fecGroupUpdate()
 {
+    if(fecGroupList->empty())
+        return false;
+
     fecHashMap->clear();
     CirGate* gate;
     CirGate::PatternKey key;
     grouplist::iterator group;
     grouplist* nfecGroupList = new grouplist();
+
+
     for(grouplist::iterator itr = fecGroupList->begin();
-            ;)
+        itr != fecGroupList->end();)
     {
         for(IdList::iterator ite = itr->begin();
                 ite != itr->end(); ite++)
