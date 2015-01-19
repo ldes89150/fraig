@@ -140,7 +140,7 @@ private:
    bool simulate;
    unsigned nSim;
    void gateSim(unsigned gid, unsigned &round);
-   void roundSim(unsigned &round);
+   void roundSim(unsigned &round, unsigned bitPerRound = 32);
    void resetSim();
    void randomAddPattern();
    void fecGroupInit();

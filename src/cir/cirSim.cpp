@@ -138,7 +138,12 @@ CirMgr::fileSim(ifstream& patternFile)
     for(round = 0; round<roundMAX; round++)
     {
         randomAddPattern();
-        roundSim(round);
+
+        if(round == roundMAX-1)
+            roundSim(round, nSim%32);
+        else
+            roundSim(round);
+
         fecGroupUpdate();
     }
     cout << ((PIs.size() != 0 && POs.size() != 0)?nSim:0) << " patterns simulated." << endl;
@@ -155,7 +160,7 @@ CirMgr::fileSim(ifstream& patternFile)
 
 
 void
-CirMgr::roundSim(unsigned &round)
+CirMgr::roundSim(unsigned &round, unsigned bitPerRound)
 {
     for(vector<unsigned>::const_iterator itr = dfsList.begin();
             itr != dfsList.end(); itr++)
@@ -183,10 +188,10 @@ CirMgr::roundSim(unsigned &round)
             poCount++;
         }
         assert(poCount = POs.size());
-        unsigned bitPerRun = nSim%32;
-        if(bitPerRun == 0)
-            bitPerRun = 32;
-        for(unsigned c = 0; c< bitPerRun; c++)
+        if(round>0)
+            (*_simLog)<<endl;
+
+        for(unsigned c = 0; c< bitPerRound; c++)
         {
             for(unsigned i = 0;i<piCount;i++)
             {
@@ -199,7 +204,7 @@ CirMgr::roundSim(unsigned &round)
                 (*_simLog) << ((poBuff[i] & 1) ? '1' : '0');
                 poBuff[i] >>= 1;
             }
-            if(c != bitPerRun-1)
+            if(c != bitPerRound-1)
                 (*_simLog)<<endl;
         }
         _simLog->flush();
