@@ -139,7 +139,7 @@ private:
 
    bool simulate;
    unsigned nSim;
-   void gateSim(unsigned gid, unsigned &round);
+   void gateSim(unsigned gid, unsigned &round, bool skipPISim = false);
    void roundSim(unsigned &round, unsigned bitPerRound = 32);
    void resetSim();
    void randomAddPattern();

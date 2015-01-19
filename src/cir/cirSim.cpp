@@ -170,7 +170,7 @@ CirMgr::roundSim(unsigned &round, unsigned bitPerRound)
     for(vector<unsigned>::const_iterator itr = dfsList.begin();
             itr != dfsList.end(); itr++)
     {
-        gateSim(*itr, round);
+        gateSim(*itr, round, true);
     }
     unsigned piBuff[PIs.size()];
     unsigned poBuff[POs.size()];
@@ -218,7 +218,7 @@ CirMgr::roundSim(unsigned &round, unsigned bitPerRound)
 
 
 void
-CirMgr::gateSim(unsigned gid, unsigned &round)
+CirMgr::gateSim(unsigned gid, unsigned &round, bool skipPISim)
 {
     CirGate* gate = getGate(gid);
     assert(gate != 0);
@@ -250,6 +250,8 @@ CirMgr::gateSim(unsigned gid, unsigned &round)
     }
     case PI_GATE:
     {
+        if(skipPISim)
+            return;
         gate->pattern = patternPool[gid][round];
         break;
     }
