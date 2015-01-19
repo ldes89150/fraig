@@ -95,8 +95,7 @@ CirMgr::sweep()
                 }
             }
         }
-        cout<<"Sweeping: "<<g
-            <<"("<<(*ptr)->id<<") removed..."<<endl;
+        cout<<"Sweeping: AIG("<<(*ptr)->id<<") removed..."<<endl;
         delete (*ptr);
         (*ptr) = 0;
 
