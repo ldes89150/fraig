@@ -80,6 +80,8 @@ public:
 void
 CirMgr::fraig()
 {
+    if(not simulate)
+        return;
     bool invert;
     unsigned ref;
     fecEraser eraser;

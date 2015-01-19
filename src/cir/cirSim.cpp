@@ -91,8 +91,12 @@ CirMgr::fileSim(ifstream& patternFile)
             {
                 cerr << "\nError: Pattern(" << curLine <<  ") length(" << curLine.length()
                      << ") does not match the number of inputs(" << this->I << ") in a circuit!!" << endl;
+                nSim = 0;
+                cout << 0 << " patterns simulated." << endl;
+                simulate = false;
             }
-            break;
+
+            return;
         }
         size_t pos = 0;
         // http://stackoverflow.com/questions/8888748/how-to-check-if-given-c-string-or-char-contains-only-digits
@@ -100,7 +104,10 @@ CirMgr::fileSim(ifstream& patternFile)
         {
             cerr << "Error: Pattern(" << curLine << ") contains a non-0/1 character(\'"
                  << curLine[pos] << "\')." << endl;
-            break;
+            nSim = 0;
+            cout << 0 << " patterns simulated." << endl;
+            simulate = false;
+            return;
         }
         for(unsigned int i = 0; i < this->I; i++)
         {
