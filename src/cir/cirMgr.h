@@ -138,6 +138,7 @@ private:
 
 
    bool simulate;
+   unsigned nSim;
    void gateSim(unsigned gid, unsigned &round);
    void roundSim(unsigned &round);
    void resetSim();

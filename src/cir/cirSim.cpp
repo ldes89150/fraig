@@ -75,7 +75,7 @@ CirMgr::fileSim(ifstream& patternFile)
 
 
     cout << "\n"; // mysterious \n in ref???
-    unsigned nSim = 0;
+    nSim = 0;
     uint32_t *patbuff = new uint32_t[I];
     for(unsigned i = 0; i<I; i++)
     {
@@ -161,6 +161,48 @@ CirMgr::roundSim(unsigned &round)
             itr != dfsList.end(); itr++)
     {
         gateSim(*itr, round);
+    }
+    unsigned piBuff[PIs.size()];
+    unsigned poBuff[POs.size()];
+    unsigned piCount = 0;
+    unsigned poCount = 0;
+    if(_simLog)
+    {
+        CirGate* gate;
+        for(IdList::iterator itr = PIs.begin();itr != PIs.end();itr++)
+        {
+            gate = getGate(*itr /2);
+            piBuff[piCount] = gate->pattern;
+            piCount++;
+        }
+        assert(piCount = PIs.size());
+        for(CirGate** ptr = cirOutputGateBegin(); ptr != cirGateEnd(); ptr++)
+        {
+            gate = *ptr;
+            poBuff[poCount] = gate->pattern;
+            poCount++;
+        }
+        assert(poCount = POs.size());
+        unsigned bitPerRun = nSim%32;
+        if(bitPerRun == 0)
+            bitPerRun = 32;
+        for(unsigned c = 0; c< bitPerRun; c++)
+        {
+            for(unsigned i = 0;i<piCount;i++)
+            {
+                (*_simLog) << ((piBuff[i] & 1) ? '1' : '0');
+                piBuff[i] >>= 1;
+            }
+            (*_simLog) <<' ';
+            for(unsigned i = 0;i<poCount;i++)
+            {
+                (*_simLog) << ((poBuff[i] & 1) ? '1' : '0');
+                poBuff[i] >>= 1;
+            }
+            if(c != bitPerRun-1)
+                (*_simLog)<<endl;
+        }
+        _simLog->flush();
     }
 }
 

@@ -34,10 +34,7 @@ void
 CirMgr::strash()
 {
     unsigned n;
-    if(A>100)
-        n = A/100;
-    else
-        n = 100;
+    n = A/100 + 100;
 
     HashMap<CirGate::FanInKey, unsigned> gatesHashMap((size_t) n);
     unsigned match;

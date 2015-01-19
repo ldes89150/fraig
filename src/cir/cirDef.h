@@ -16,7 +16,7 @@
 #include <list>
 #include <algorithm>
 
-#define CHECK_HEALTH 1
+#define CHECK_HEALTH 0
 #define PRINT_PROVING_RESULT 1
 
 using namespace std;
