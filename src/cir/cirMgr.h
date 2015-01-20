@@ -154,8 +154,31 @@ private:
    //for fraig
    SatSolver* satSolver;
    void satInitialize();
-   bool solveBySat(unsigned gid1, unsigned gid2, bool &inPhase);
+   bool solveBySat(unsigned gid1, unsigned gid2, bool &invert);
+   class fecSolver
+   {
+   public:
+       fecSolver()
+       {
+           varArray = 0;
+           solver = 0;
+       }
+       ~fecSolver()
+       {
+           if(varArray != 0)
+               delete [] varArray;
+           if(solver != 0)
+               delete solver;
+       }
+       Var* varArray;
+       SatSolver* solver;
+       unsigned gid1, gid2;
+       bool invert, result;
 
+       void init();
+       void set(unsigned &g1, unsigned &g2){gid1 = g1; gid2 = g2;}
+       void operator () ();
+   };
 };
 
 class fecEraser

@@ -166,6 +166,42 @@ bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
     return result;
 }
 
+void CirMgr::fecSolver::operator () ()
+{
+    if(solver == 0)
+        init();
+
+    CirGate* gate1 = cirMgr->getGate(gid1);
+    CirGate* gate2 = cirMgr->getGate(gid2);
+    solver->assumeRelease();
+    solver->assumeProperty(varArray[gid1],false);
+    invert = (gate1->phase != gate2->phase);
+
+    if(gid1 == 0)
+    {
+        //might have problem
+        #if PRINT_PROVING_RESULT
+        cout << "Proving " << gid2 << " = " << (invert ?"false":"true") << "...";
+        #endif
+        solver->assumeProperty(varArray[gid2],~invert);
+    }
+    else
+    {
+        #if PRINT_PROVING_RESULT
+        cout << "Proving (" << gid1 << ", "
+        << (invert ? "":"!") << gid2 << ")...";
+        #endif
+        Var f = solver->newVar();
+        solver->addXorCNF(f, varArray[gid1], false, varArray[gid2], invert);
+        solver->assumeProperty(f, true);
+    }
+    result = solver->assumpSolve();
+    #if PRINT_PROVING_RESULT
+    cout << (result?"SAT!!":"UNSAT!!")<<endl;
+    #endif
+
+}
+
 
 
 void CirMgr::satInitialize()
@@ -192,6 +228,35 @@ void CirMgr::satInitialize()
             satSolver -> addAigCNF(gate->satVar,
             getGate(gate->fanIn[0].first)->satVar,gate->fanIn[0].second,
             getGate(gate->fanIn[1].first)->satVar,gate->fanIn[1].second);
+        }
+    }
+}
+
+void CirMgr::fecSolver::init()
+{
+    if(solver != 0)
+        return;
+    this->solver = new SatSolver();
+    solver->initialize();
+    CirGate* gate;
+    varArray = new Var[cirMgr->M];
+
+    varArray[0] = solver->newVar();
+    for(IdList::const_iterator itr = cirMgr->dfsList.begin();
+    itr != cirMgr->dfsList.end();itr++)
+    {
+        gate =  cirMgr->getGate(*itr);
+        if(gate->gateType != AIG_GATE and
+            gate->gateType != PI_GATE)
+        {
+            continue;
+        }
+        varArray[*itr] = solver->newVar();
+        if(gate->gateType == AIG_GATE)
+        {
+            solver -> addAigCNF(varArray[*itr],
+            varArray[gate->fanIn[0].first],gate->fanIn[0].second,
+            varArray[gate->fanIn[1].first],gate->fanIn[1].second);
         }
     }
 }
