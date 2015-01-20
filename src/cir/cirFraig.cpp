@@ -12,7 +12,7 @@
 #include "sat.h"
 #include "myHashMap.h"
 #include "util.h"
-
+#include <thread>
 using namespace std;
 
 class fecEraser;
@@ -80,10 +80,11 @@ public:
 void
 CirMgr::fraig()
 {
-    fecSolver fs1, fs2;
-    bool th2;
+    fecSolver fs1, fs2, fs3;
+    bool th2, th3;
     fs1.init();
     fs2.init();
+    fs3.init();
     unsigned ref;
     fecEraser eraser;
     typedef std::vector<fraigTask> taskList;
@@ -102,13 +103,34 @@ CirMgr::fraig()
                 ite != itr->end();ite++)
             {
                 th2 = (ite != (itr->end()-1));
+                th3 = (ite != (itr->end()-2));
                 fs1.set(ref,*ite);
-                fs1();
                 if(th2)
                 {
-                    ite++;
-                    fs2.set(ref,*ite);
-                    fs2();
+                    if(th3)
+                    {
+                        ite++;
+                        fs2.set(ref,*ite);
+                        ite++;
+                        fs3.set(ref,*ite);
+                        thread mt2(std::ref(fs2));
+                        thread mt3(std::ref(fs3));
+                        fs1();
+                        mt2.join();
+                        mt3.join();
+                    }
+                    else
+                    {
+                        ite++;
+                        fs2.set(ref,*ite);
+                        thread mt2(std::ref(fs2));
+                        fs1();
+                        mt2.join();
+                    }
+                }
+                else
+                {
+                    fs1();
                 }
 
                 if(not fs1.result)

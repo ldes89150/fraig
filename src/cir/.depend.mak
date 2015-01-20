@@ -4,11 +4,6 @@ cirCmd.o: cirCmd.cpp cirMgr.h myHashMap.h cirGate.h cirDef.h sat.h \
  ../../include/Proof.h ../../include/File.h cirCmd.h \
  ../../include/cmdParser.h ../../include/cmdCharDef.h \
  ../../include/util.h ../../include/rnGen.h ../../include/myUsage.h
-cirFraig.o: cirFraig.cpp cirMgr.h myHashMap.h cirGate.h cirDef.h sat.h \
- ../../include/Solver.h ../../include/SolverTypes.h \
- ../../include/Global.h ../../include/VarOrder.h ../../include/Heap.h \
- ../../include/Proof.h ../../include/File.h ../../include/util.h \
- ../../include/rnGen.h ../../include/myUsage.h
 cirGate.o: cirGate.cpp cirGate.h cirDef.h myHashMap.h sat.h \
  ../../include/Solver.h ../../include/SolverTypes.h \
  ../../include/Global.h ../../include/VarOrder.h ../../include/Heap.h \
