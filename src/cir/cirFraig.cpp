@@ -88,7 +88,7 @@ CirMgr::fraig()
     if(fecGroupList == 0)
         return;
     for(grouplist::iterator itr = fecGroupList->begin();
-        itr != fecGroupList->end(); itr++)
+        itr != fecGroupList->end(); )
     {
         do
         {
@@ -109,6 +109,7 @@ CirMgr::fraig()
                                  eraser),
                        itr->end());
         }while(itr->size() > 1);
+        fecGroupList->erase(itr++);
     }
 
     for(taskList::iterator itr = task.begin();
@@ -123,7 +124,8 @@ CirMgr::fraig()
     #endif
     buildfanout();
     buildDFSList();
-
+    optimize();
+    strash();
 }
 
 /********************************************/
