@@ -96,6 +96,7 @@ CirMgr::fraig()
         return;
     do
     {
+        reEnter:
         for(grouplist::iterator itr = fecGroupList->begin();
             itr != fecGroupList->end(); )
         {
@@ -135,13 +136,17 @@ CirMgr::fraig()
                                   getGate(it->parent),
                                   it->invert, "Fraig");
                         }
-                        itr->erase(remove_if(itr->begin(),
-                                   itr->end(),
-                                   eraser),
-                                   itr->end());
+                        if(not eraser.toRemove.empty())
+                            itr->erase(remove_if(itr->begin(),
+                            itr->end(),
+                            eraser),
+                            itr->end());
                         eraser.toRemove.clear();
-                        //buildfanout();
+                        buildfanout();
                         buildDFSList();
+                        optimize();
+                        strash();
+                        sweep();
                         //checkhealth();
                         task.clear();
                         for(vector<unsigned>::const_iterator itr = dfsList.begin();
@@ -149,12 +154,8 @@ CirMgr::fraig()
                         {
                             gateSim(*itr, z, true);
                         }
-
-                        if(not fecGroupUpdate())
-                            fail++;
+                        fecGroupUpdate();
                         fecGroupPushToGate();
-                        if(maxFail == fail)
-                            fecGroupList->clear();
                         c=0;
                         goto reEnter;
                     }
@@ -167,7 +168,7 @@ CirMgr::fraig()
             }while(itr->size() > 1);
             fecGroupList->erase(itr++);
         }
-        reEnter:
+
         ;
     }while(not fecGroupList->empty());
     for(taskList::iterator itr = task.begin();
