@@ -40,7 +40,7 @@ CirMgr::randomSim()
         fecGroupInit();
     }
     resetSim();
-    unsigned maxFail = (unsigned)(3+ 3*(int)log((double)(A+I+O)));
+    unsigned maxFail = (unsigned)(3+ 10*(int)log((double)(A+I+O)));
     cout<<"MAX_FAIL = "<<maxFail<<endl;
     unsigned fail = 0;
     unsigned round;
@@ -374,6 +374,8 @@ bool CirMgr::fecGroupUpdate()
                 ite != itr->end(); ite++)
         {
             gate = getGate(*ite);
+            if(gate ==0)
+                continue;
             key = gate->getPatternKey();
             //cerr<<(*ite)<<' '<<key()<<' '<<key.pat<<endl;
             if(fecHashMap->retrive(key,group))

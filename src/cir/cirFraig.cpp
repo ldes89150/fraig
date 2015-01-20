@@ -12,6 +12,8 @@
 #include "sat.h"
 #include "myHashMap.h"
 #include "util.h"
+#include <math.h>
+
 
 using namespace std;
 
@@ -80,38 +82,94 @@ public:
 void
 CirMgr::fraig()
 {
+    unsigned z=0;
+    CirGate* gate;
+    unsigned c=0;
     bool invert;
     unsigned ref;
     fecEraser eraser;
     typedef std::vector<fraigTask> taskList;
     taskList task;
+    unsigned maxFail = (unsigned)(3+ 3*(int)log((double)(A+I+O)));
+    unsigned fail =0;
     if(fecGroupList == 0)
         return;
-    for(grouplist::iterator itr = fecGroupList->begin();
-        itr != fecGroupList->end(); )
+    do
     {
-        do
+        for(grouplist::iterator itr = fecGroupList->begin();
+            itr != fecGroupList->end(); )
         {
-            eraser.toRemove.clear();
-            ref = (*itr)[0];
-            eraser.toRemove.insert(ref);
-            for(IdList::iterator ite = itr->begin()+1;
-                ite != itr->end();ite++)
+            do
             {
-                if(not solveBySat(ref,*ite,invert))
+                eraser.toRemove.clear();
+                ref = (*itr)[0];
+                eraser.toRemove.insert(ref);
+                for(IdList::iterator ite = itr->begin()+1;
+                    ite != itr->end();ite++)
                 {
-                    eraser.toRemove.insert(ref);
-                    task.push_back(fraigTask(ref,*ite,invert));
-                }
-            }
-            itr->erase(remove_if(itr->begin(),
-                                 itr->end(),
-                                 eraser),
-                       itr->end());
-        }while(itr->size() > 1);
-        fecGroupList->erase(itr++);
-    }
+                    if(not solveBySat(ref,*ite,invert))
+                    {
+                        fail = 0;
+                        eraser.toRemove.insert(ref);
+                        task.push_back(fraigTask(ref,*ite,invert));
+                    }
+                    else
+                    {
+                        for(IdList::iterator it = PIs.begin();it != PIs.end();it++)
+                        {
+                            gate = getGate(*it/2);
+                            unsigned v = satSolver->getValue(gate->satVar);
+                            gate->pattern *= 2;
+                            gate->pattern += v;
 
+                        }
+                        c++;
+                    }
+                    if(c == 32)
+                    {
+
+                        for(taskList::iterator it = task.begin();
+                            it != task.end();it++)
+                        {
+                            merge(getGate(it->merge),
+                                  getGate(it->parent),
+                                  it->invert, "Fraig");
+                        }
+                        itr->erase(remove_if(itr->begin(),
+                                   itr->end(),
+                                   eraser),
+                                   itr->end());
+                        eraser.toRemove.clear();
+                        //buildfanout();
+                        buildDFSList();
+                        //checkhealth();
+                        task.clear();
+                        for(vector<unsigned>::const_iterator itr = dfsList.begin();
+                            itr != dfsList.end(); itr++)
+                        {
+                            gateSim(*itr, z, true);
+                        }
+
+                        if(not fecGroupUpdate())
+                            fail++;
+                        fecGroupPushToGate();
+                        if(maxFail == fail)
+                            fecGroupList->clear();
+                        c=0;
+                        goto reEnter;
+                    }
+                }
+                if(not eraser.toRemove.empty())
+                    itr->erase(remove_if(itr->begin(),
+                                        itr->end(),
+                                        eraser),
+                                        itr->end());
+            }while(itr->size() > 1);
+            fecGroupList->erase(itr++);
+        }
+        reEnter:
+        ;
+    }while(not fecGroupList->empty());
     for(taskList::iterator itr = task.begin();
         itr != task.end();itr++)
     {
