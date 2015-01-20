@@ -551,6 +551,7 @@ CirMgr::writeAag(ostream& outfile) const
             count++;
         }
     }
+    outfile.flush();
 }
 
 void CirMgr::buildfanout()
