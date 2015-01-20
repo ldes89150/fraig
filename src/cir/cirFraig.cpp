@@ -80,8 +80,10 @@ public:
 void
 CirMgr::fraig()
 {
-    fecSolver fs;
-    fs.init();
+    fecSolver fs1, fs2;
+    bool th2;
+    fs1.init();
+    fs2.init();
     unsigned ref;
     fecEraser eraser;
     typedef std::vector<fraigTask> taskList;
@@ -99,12 +101,25 @@ CirMgr::fraig()
             for(IdList::iterator ite = itr->begin()+1;
                 ite != itr->end();ite++)
             {
-                fs.set(ref,*ite);
-                fs();
-                if(not fs.result)
+                th2 = (ite != (itr->end()-1));
+                fs1.set(ref,*ite);
+                fs1();
+                if(th2)
                 {
-                    eraser.toRemove.insert(ref);
-                    task.push_back(fraigTask(ref,*ite,fs.invert));
+                    ite++;
+                    fs2.set(ref,*ite);
+                    fs2();
+                }
+
+                if(not fs1.result)
+                {
+                    eraser.toRemove.insert(fs1.gid1);
+                    task.push_back(fraigTask(fs1.gid1,fs1.gid2,fs1.invert));
+                }
+                if((not fs1.result) and th2)
+                {
+                    eraser.toRemove.insert(fs2.gid1);
+                    task.push_back(fraigTask(fs2.gid1,fs2.gid2,fs2.invert));
                 }
             }
             itr->erase(remove_if(itr->begin(),
