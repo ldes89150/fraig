@@ -152,6 +152,57 @@ private:
    }
 
    //for fraig
+   
+   grouplist::const_iterator currentFECGroup;
+   IdList::const_iterator currentFECBase, currentFECCompare;
+   bool fecTaskFinish;
+   
+   void initFECTask()
+   {
+       if(fecGroupList == 0)
+           return;
+       fecTaskFinish = false;
+       currentFECGroup = fecGroupList->begin();
+       currentFECBase = currentFECGroup->begin();
+       currentFECCompare = currentFECBase+1;
+       return;
+
+   }
+
+   bool getFECTask(unsigned &gid1, unsigned &gid2)
+   {
+       if(fecTaskFinish)
+           return false;
+       gid1 = *currentFECBase;
+       gid2 = *currentFECCompare;
+
+       currentFECCompare++;
+       if(currentFECCompare == currentFECBase->end())
+       {
+           currentFECBase++;
+           if(currentFECBase == (currentFECBase->end() -1))
+           {
+               currentFECGroup++;
+               if(currentFECGroup == fecGroupList->end())
+               {
+                   fecTaskFinish = true;
+               }
+               else
+               {
+                   currentFECBase = currentFECGroup->begin();
+                   currentFECCompare = currentFECBase +1;
+               }
+           }
+           else
+           {
+               currentFECCompare = currentFECBase +1;
+           }
+       }
+       return true;
+   }
+
+
+
    SatSolver* satSolver;
    void satInitialize();
    bool solveBySat(unsigned gid1, unsigned gid2, bool &invert);
