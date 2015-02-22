@@ -26,6 +26,27 @@ using namespace std;
 
 extern CirMgr *cirMgr;
 
+class fraigTask
+{
+public:
+    fraigTask(unsigned p, unsigned m, bool i):
+    parent(p), merge(m), invert(i){}
+
+    unsigned parent;
+    unsigned merge;
+    bool invert;
+};
+class fecEraser
+{
+public:
+    set<unsigned> toRemove;
+    bool operator () (unsigned g) const
+    {
+        return toRemove.find(g) != toRemove.end();
+    }
+
+};
+
 class CirMgr
 {
 public:
@@ -153,53 +174,38 @@ private:
 
    //for fraig
    
-   grouplist::const_iterator currentFECGroup;
-   IdList::const_iterator currentFECBase, currentFECCompare;
-   bool fecTaskFinish;
+   grouplist::iterator currentFECGroup;
+   vector<fraigTask> task; 
    
+   bool taskFinish;
+
    void initFECTask()
    {
-       if(fecGroupList == 0)
-           return;
-       fecTaskFinish = false;
        currentFECGroup = fecGroupList->begin();
-       currentFECBase = currentFECGroup->begin();
-       currentFECCompare = currentFECBase+1;
+       taskFinish = false;
        return;
+   }   
 
-   }
-
-   bool getFECTask(unsigned &gid1, unsigned &gid2)
+   bool getFECTask(grouplist::iterator &itr)
    {
-       if(fecTaskFinish)
+       if(taskFinish)
            return false;
-       gid1 = *currentFECBase;
-       gid2 = *currentFECCompare;
-
-       currentFECCompare++;
-       if(currentFECCompare == currentFECBase->end())
+       if(currentFECGroup == fecGroupList->end())
        {
-           currentFECBase++;
-           if(currentFECBase == (currentFECBase->end() -1))
-           {
-               currentFECGroup++;
-               if(currentFECGroup == fecGroupList->end())
-               {
-                   fecTaskFinish = true;
-               }
-               else
-               {
-                   currentFECBase = currentFECGroup->begin();
-                   currentFECCompare = currentFECBase +1;
-               }
-           }
-           else
-           {
-               currentFECCompare = currentFECBase +1;
-           }
+           taskFinish = true;
+           return false;
        }
+       itr = currentFECGroup;
+       currentFECGroup ++;
        return true;
    }
+
+   void setFraigTask(unsigned &parent, unsigned &merge, bool &invert)
+   {
+       task.push_back(fraigTask(parent, merge, invert));
+   }
+
+
 
 
 
@@ -225,22 +231,14 @@ private:
        SatSolver* solver;
        unsigned gid1, gid2;
        bool invert, result;
+       fecEraser eraser; 
+       grouplist::iterator itr;
 
        void init();
-       void set(unsigned &g1, unsigned &g2){gid1 = g1; gid2 = g2;}
+       void solve();
        void operator () ();
    };
 };
 
-class fecEraser
-{
-public:
-    set<unsigned> toRemove;
-    bool operator () (unsigned g) const
-    {
-        return toRemove.find(g) == toRemove.end();
-    }
-
-};
 
 #endif // CIR_MGR_H

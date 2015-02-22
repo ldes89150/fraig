@@ -64,16 +64,6 @@ CirMgr::strash()
 }
 
 
-class fraigTask
-{
-public:
-    fraigTask(unsigned p, unsigned m, bool i):
-    parent(p), merge(m), invert(i){}
-
-    unsigned parent;
-    unsigned merge;
-    bool invert;
-};
 
 
 
@@ -81,91 +71,33 @@ void
 CirMgr::fraig()
 {
     fecSolver fs1, fs2, fs3;
-    bool th2, th3;
     fs1.init();
-    fs2.init();
-    fs3.init();
-    unsigned ref;
-    fecEraser eraser;
-    typedef std::vector<fraigTask> taskList;
-    taskList task;
-    if(fecGroupList == 0)
-        return;
-    for(grouplist::iterator itr = fecGroupList->begin();
-        itr != fecGroupList->end(); itr++)
+    initFECTask();
+    thread mt1(std::ref(fs1));
+    while(currentFECGroup != fecGroupList->end())
     {
-        do
-        {
-            eraser.toRemove.clear();
-            ref = (*itr)[0];
-            eraser.toRemove.insert(ref);
-            for(IdList::iterator ite = itr->begin()+1;
-                ite != itr->end();ite++)
-            {
-                th2 = (ite != (itr->end()-1));
-                th3 = (ite != (itr->end()-2));
-                fs1.set(ref,*ite);
-                if(th2)
-                {
-                    if(th3)
-                    {
-                        ite++;
-                        fs2.set(ref,*ite);
-                        ite++;
-                        fs3.set(ref,*ite);
-                        thread mt2(std::ref(fs2));
-                        thread mt3(std::ref(fs3));
-                        fs1();
-                        mt2.join();
-                        mt3.join();
-                    }
-                    else
-                    {
-                        ite++;
-                        fs2.set(ref,*ite);
-                        thread mt2(std::ref(fs2));
-                        fs1();
-                        mt2.join();
-                    }
-                }
-                else
-                {
-                    fs1();
-                }
-
-                if(not fs1.result)
-                {
-                    eraser.toRemove.insert(fs1.gid1);
-                    task.push_back(fraigTask(fs1.gid1,fs1.gid2,fs1.invert));
-                }
-                if((not fs1.result) and th2)
-                {
-                    eraser.toRemove.insert(fs2.gid1);
-                    task.push_back(fraigTask(fs2.gid1,fs2.gid2,fs2.invert));
-                }
-            }
-            itr->erase(remove_if(itr->begin(),
-                                 itr->end(),
-                                 eraser),
-                       itr->end());
-        }while(itr->size() > 1);
+        ;
     }
-
-    for(taskList::iterator itr = task.begin();
-        itr != task.end();itr++)
+    if(mt1.joinable())
+        mt1.join();
+    cout<<"mt1 finisg"<<endl;
+    for(vector<fraigTask>::iterator itr = task.begin();
+        itr != task.end(); itr++)
     {
         merge(getGate(itr->merge),
               getGate(itr->parent),
-              itr->invert, "Fraig");
+              itr->invert,"Fraig");
+
     }
-    #if CHECK_HEALTH
-    checkhealth();
-    #endif
     buildfanout();
     buildDFSList();
+    optimize();
+    strash();
 
-}
+    if(fecGroupList == 0)
+        return;
 
+} 
 /********************************************/
 /*   Private member functions about fraig   */
 /********************************************/
@@ -206,7 +138,43 @@ bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
     return result;
 }
 
+
+
+
+
 void CirMgr::fecSolver::operator () ()
+{
+    while(cirMgr->getFECTask(this->itr))
+    {
+        do
+        {
+            this->eraser.toRemove.clear();
+            gid1 = (*itr)[0];
+            this->eraser.toRemove.insert(gid1);
+            for(IdList::iterator ite = itr->begin()+1;
+                ite != itr->end(); ite++)
+            {
+                gid2 = (*ite);
+                solve();
+                if(not result)
+                {
+                    eraser.toRemove.insert(gid2);
+                    cirMgr->setFraigTask(gid1,gid2,invert);
+                }
+            }
+            itr->erase(remove_if(itr->begin(),
+                                 itr->end(),
+                                 this->eraser),
+                       itr->end());
+        }while(itr->size() > 1);
+    }
+    cout<<"finish"<<endl;
+    
+    return;
+}
+
+
+void CirMgr::fecSolver::solve()
 {
     if(solver == 0)
         init();
