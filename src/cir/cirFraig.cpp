@@ -12,6 +12,7 @@
 #include "sat.h"
 #include "myHashMap.h"
 #include "util.h"
+#include <unistd.h>
 #include <thread>
 using namespace std;
 
@@ -73,9 +74,11 @@ CirMgr::fraig()
     fecSolver fs1, fs2, fs3;
     fs1.init();
     initFECTask();
+    task.clear();
     thread mt1(std::ref(fs1));
     while(currentFECGroup != fecGroupList->end())
     {
+        usleep(100000);
         ;
     }
     if(mt1.joinable())
@@ -89,57 +92,17 @@ CirMgr::fraig()
               itr->invert,"Fraig");
 
     }
+    checkhealth();
     buildfanout();
     buildDFSList();
     optimize();
     strash();
-
-    if(fecGroupList == 0)
-        return;
+    
 
 } 
 /********************************************/
 /*   Private member functions about fraig   */
 /********************************************/
-
-bool CirMgr::solveBySat(unsigned gid1, unsigned gid2, bool &invert)
-{
-    if(satSolver == 0)
-        satInitialize();
-
-    CirGate* gate1 = getGate(gid1);
-    CirGate* gate2 = getGate(gid2);
-    satSolver->assumeRelease();
-    satSolver->assumeProperty(gate1->satVar,false);
-    invert = (gate1->phase != gate2->phase);
-
-    if(gid1 == 0)
-    {
-        //might have problem
-        #if PRINT_PROVING_RESULT
-        cout << "Proving " << gid2 << " = " << (invert ?"false":"true") << "...";
-        #endif
-        satSolver->assumeProperty(gate2->satVar,~invert);
-    }
-    else
-    {
-        #if PRINT_PROVING_RESULT
-        cout << "Proving (" << gid1 << ", "
-             << (invert ? "":"!") << gid2 << ")...";
-        #endif
-        Var f = satSolver->newVar();
-        satSolver->addXorCNF(f, gate1->satVar, false, gate2->satVar, invert);
-        satSolver->assumeProperty(f, true);
-    }
-    bool result = satSolver->assumpSolve();
-    #if PRINT_PROVING_RESULT
-    cout << (result?"SAT!!":"UNSAT!!")<<endl;
-    #endif
-    return result;
-}
-
-
-
 
 
 void CirMgr::fecSolver::operator () ()
@@ -168,8 +131,6 @@ void CirMgr::fecSolver::operator () ()
                        itr->end());
         }while(itr->size() > 1);
     }
-    cout<<"finish"<<endl;
-    
     return;
 }
 
@@ -189,14 +150,14 @@ void CirMgr::fecSolver::solve()
     {
         //might have problem
         #if PRINT_PROVING_RESULT
-        cout << "Proving " << gid2 << " = " << (invert ?"false":"true") << "...";
+        cerr << "Proving " << gid2 << " = " << (invert ?"false":"true") << "...";
         #endif
         solver->assumeProperty(varArray[gid2],~invert);
     }
     else
     {
         #if PRINT_PROVING_RESULT
-        cout << "Proving (" << gid1 << ", "
+        cerr << "Proving (" << gid1 << ", "
         << (invert ? "":"!") << gid2 << ")...";
         #endif
         Var f = solver->newVar();
@@ -205,40 +166,12 @@ void CirMgr::fecSolver::solve()
     }
     result = solver->assumpSolve();
     #if PRINT_PROVING_RESULT
-    cout << (result?"SAT!!":"UNSAT!!")<<endl;
+    cerr << (result?"SAT!!":"UNSAT!!")<<endl;
     #endif
 
 }
 
 
-
-void CirMgr::satInitialize()
-{
-    if(satSolver != 0)
-        return;
-    this->satSolver = new SatSolver();
-    satSolver->initialize();
-    CirGate* gate;
-    gate = getGate(0);
-    gate->satVar = satSolver->newVar();
-    for(IdList::const_iterator itr = dfsList.begin();
-        itr != dfsList.end();itr++)
-    {
-        gate = getGate(*itr);
-        if(gate->gateType != AIG_GATE and
-           gate->gateType != PI_GATE)
-        {
-           continue;
-        }
-        gate->satVar = satSolver->newVar();
-        if(gate->gateType == AIG_GATE)
-        {
-            satSolver -> addAigCNF(gate->satVar,
-            getGate(gate->fanIn[0].first)->satVar,gate->fanIn[0].second,
-            getGate(gate->fanIn[1].first)->satVar,gate->fanIn[1].second);
-        }
-    }
-}
 
 void CirMgr::fecSolver::init()
 {

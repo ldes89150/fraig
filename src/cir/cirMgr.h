@@ -42,7 +42,7 @@ public:
     set<unsigned> toRemove;
     bool operator () (unsigned g) const
     {
-        return toRemove.find(g) != toRemove.end();
+        return toRemove.find(g) == toRemove.end();
     }
 
 };
