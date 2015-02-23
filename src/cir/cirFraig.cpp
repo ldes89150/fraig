@@ -109,6 +109,7 @@ void CirMgr::fecSolver::operator () ()
     cirMgr->readForSim[id] = false;
     bool meetUNSAT = false;
     counter = 0;
+    unsigned n = 0;
     while(cirMgr->getFECTask(this->itr))
     {
         do
@@ -148,7 +149,7 @@ void CirMgr::fecSolver::operator () ()
                     this->init();
                     goto endSection;    
                 }
-                else if(counter >= 31)
+                else if(counter >= (31+32*n))
                 {
                     cirMgr->ready = true;
                     cirMgr->readForSim[id] = true;
@@ -158,6 +159,14 @@ void CirMgr::fecSolver::operator () ()
                         std::this_thread::yield();
                     }
                     cirMgr->ready = false;
+                    if(meetUNSAT)
+                    {
+                        n = 0;
+                    }
+                    else
+                    {
+                        n++;
+                    }
                     meetUNSAT = false;
                     counter = 0;
                     cirMgr->readForSim[id] = false;
@@ -177,9 +186,10 @@ void CirMgr::fecSolver::operator () ()
                 }
             }
             itr->erase(itr->begin());
-
+            n = 0;
         }while(itr->size() > 1);
         cirMgr->fecGroupList->erase(itr);
+        n = 0;
         endSection:
         ;
     }
