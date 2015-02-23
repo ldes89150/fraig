@@ -145,6 +145,7 @@ void CirMgr::fecSolver::operator () ()
                     cirMgr->readForSim[id] = true;
                     cirMgr->simCon.wait(lck); 
                     cirMgr->readForSim[id] = false;
+                    this->init();
                     goto endSection;    
                 }
                 else if(counter >= 31)
@@ -160,12 +161,18 @@ void CirMgr::fecSolver::operator () ()
                     meetUNSAT = false;
                     counter = 0;
                     cirMgr->readForSim[id] = false;
+                    cirMgr->fraigTaskMerge();
+                    cirMgr->buildDFSList();
+                    cirMgr->sweep();
+                    cirMgr->optimize();
+                    cirMgr->strash();
+
                     cirMgr->roundSim(id);
                     cirMgr->fecGroupUpdate();
                     cirMgr->initFECTask();
 
-
                     cirMgr->simCon.notify_all();
+                    this->init();
                     goto endSection;
                 }
             }

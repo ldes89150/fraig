@@ -375,6 +375,8 @@ bool CirMgr::fecGroupUpdate()
                 ite != itr->end(); ite++)
         {
             gate = getGate(*ite);
+            if(gate==0)
+                continue;
             key = gate->getPatternKey();
             //cerr<<(*ite)<<' '<<key()<<' '<<key.pat<<endl;
             if(fecHashMap->retrive(key,group))
