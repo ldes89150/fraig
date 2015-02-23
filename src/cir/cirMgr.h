@@ -19,7 +19,7 @@
 #include "cirGate.h"
 #include <mutex>
 #include <thread>
-
+#include <condition_variable>
 
 using namespace std;
 
@@ -215,6 +215,13 @@ private:
    SatSolver* satSolver;
    void satInitialize();
    bool solveBySat(unsigned gid1, unsigned gid2, bool &invert);
+
+
+   bool readForSim[4];
+   bool ready;
+   std::condition_variable simCon;
+   std::mutex simMutex;
+    
    class fecSolver
    {
    public:
@@ -230,6 +237,8 @@ private:
            if(solver != 0)
                delete solver;
        }
+       unsigned id;
+       unsigned counter;
        Var* varArray;
        SatSolver* solver;
        unsigned gid1, gid2;
@@ -244,4 +253,4 @@ private:
 };
 
 
-#endif // CIR_MGR_H
+#endif 

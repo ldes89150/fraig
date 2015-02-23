@@ -70,9 +70,11 @@ CirMgr::strash()
 void
 CirMgr::fraig()
 {
-    fecSolver fs1, fs2, fs3;
+    fecSolver fs1, fs2;
     fs1.init();
     fs2.init();
+    fs1.id = 0;
+    fs2.id = 1;
     initFECTask();
     task.clear();
     thread mt1(std::ref(fs1));
@@ -91,7 +93,6 @@ CirMgr::fraig()
               itr->invert,"Fraig");
 
     }
-    checkhealth();
     buildfanout();
     buildDFSList();
     optimize();
@@ -104,6 +105,9 @@ CirMgr::fraig()
 
 void CirMgr::fecSolver::operator () ()
 {
+    cirMgr->readForSim[id] = false;
+    bool meetUNSAT = false;
+    counter = 0;
     while(cirMgr->getFECTask(this->itr))
     {
         do
@@ -118,16 +122,62 @@ void CirMgr::fecSolver::operator () ()
                 {
                     itr->erase(ite);
                     cirMgr->setFraigTask(gid1,gid2,invert);
+                    meetUNSAT = true;
                 }
                 else
                 {
                     ite++;
+                    for(IdList::const_iterator ita = cirMgr->PIs.begin();
+                        ita != cirMgr->PIs.end(); ita++)
+                    {
+                        unsigned id = (*ita)/2;
+                        unsigned modelValue = solver->getValue(varArray[id]);
+                        (cirMgr->patternPool[id])[0] = 
+                        (cirMgr->patternPool[id])[0]*2 + modelValue; 
+                    }
+                    if(meetUNSAT)
+                        counter++;
+                }
+                if(cirMgr->ready)
+                {
+                    std::unique_lock<std::mutex> lck(cirMgr->simMutex) ;
+                    cirMgr->readForSim[id] = true;
+                    cirMgr->simCon.wait(lck); 
+                    cirMgr->readForSim[id] = false;
+                    goto endSection;    
+                }
+                else if(counter >= 31)
+                {
+                    cirMgr->ready = true;
+                    cirMgr->readForSim[id] = true;
+                    while(not (cirMgr->readForSim[0] and cirMgr->readForSim[1] and 
+                               cirMgr->readForSim[2] and cirMgr->readForSim[3]))
+                    {
+                        std::this_thread::yield();
+                    }
+                    cirMgr->ready = false;
+                    meetUNSAT = false;
+                    counter = 0;
+                    cirMgr->readForSim[id] = false;
+                    cirMgr->roundSim(id);
+                    cirMgr->fecGroupUpdate();
+                    cirMgr->initFECTask();
+
+
+                    cirMgr->simCon.notify_all();
+                    goto endSection;
                 }
             }
             itr->erase(itr->begin());
+            
+
+
         }while(itr->size() > 1);
         cirMgr->fecGroupList->erase(itr);
+        endSection:
+        ;
     }
+    cirMgr->readForSim[id] = true;
     return;
 }
 
@@ -197,4 +247,9 @@ void CirMgr::fecSolver::init()
             varArray[gate->fanIn[1].first],gate->fanIn[1].second);
         }
     }
+    for(auto &c:cirMgr->readForSim)
+    {
+        c = true;
+    }
+    cirMgr->ready = false;
 }
