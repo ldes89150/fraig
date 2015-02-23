@@ -17,6 +17,9 @@
 #include <set>
 #include "myHashMap.h"
 #include "cirGate.h"
+#include <mutex>
+#include <thread>
+
 
 using namespace std;
 
@@ -186,8 +189,11 @@ private:
        return;
    }   
 
+   mutex cirMutex;
+
    bool getFECTask(grouplist::iterator &itr)
    {
+       lock_guard<mutex> mLock(cirMutex);
        if(taskFinish)
            return false;
        if(currentFECGroup == fecGroupList->end())
@@ -202,12 +208,9 @@ private:
 
    void setFraigTask(unsigned &parent, unsigned &merge, bool &invert)
    {
+       lock_guard<mutex> mLock(cirMutex);
        task.push_back(fraigTask(parent, merge, invert));
    }
-
-
-
-
 
    SatSolver* satSolver;
    void satInitialize();

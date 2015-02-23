@@ -311,6 +311,7 @@ void CirMgr::resetSim()
         (*ptr)->pattern = 0;
         (*ptr)->infecg = false;
     }
+    fecGroupInit();
 }
 
 

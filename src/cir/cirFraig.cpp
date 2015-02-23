@@ -13,7 +13,6 @@
 #include "myHashMap.h"
 #include "util.h"
 #include <unistd.h>
-#include <thread>
 using namespace std;
 
 class fecEraser;
@@ -73,17 +72,17 @@ CirMgr::fraig()
 {
     fecSolver fs1, fs2, fs3;
     fs1.init();
+    fs2.init();
     initFECTask();
     task.clear();
     thread mt1(std::ref(fs1));
-    while(currentFECGroup != fecGroupList->end())
+    thread mt2(std::ref(fs2));
+    while(taskFinish)
     {
-        usleep(100000);
-        ;
+        std::this_thread::yield();
     }
-    if(mt1.joinable())
-        mt1.join();
-    cout<<"mt1 finisg"<<endl;
+    mt1.join();
+    mt2.join();
     for(vector<fraigTask>::iterator itr = task.begin();
         itr != task.end(); itr++)
     {
@@ -97,8 +96,6 @@ CirMgr::fraig()
     buildDFSList();
     optimize();
     strash();
-    
-
 } 
 /********************************************/
 /*   Private member functions about fraig   */
@@ -111,25 +108,25 @@ void CirMgr::fecSolver::operator () ()
     {
         do
         {
-            this->eraser.toRemove.clear();
             gid1 = (*itr)[0];
-            this->eraser.toRemove.insert(gid1);
             for(IdList::iterator ite = itr->begin()+1;
-                ite != itr->end(); ite++)
+                ite != itr->end();)
             {
                 gid2 = (*ite);
                 solve();
                 if(not result)
                 {
-                    eraser.toRemove.insert(gid2);
+                    itr->erase(ite);
                     cirMgr->setFraigTask(gid1,gid2,invert);
                 }
+                else
+                {
+                    ite++;
+                }
             }
-            itr->erase(remove_if(itr->begin(),
-                                 itr->end(),
-                                 this->eraser),
-                       itr->end());
+            itr->erase(itr->begin());
         }while(itr->size() > 1);
+        cirMgr->fecGroupList->erase(itr);
     }
     return;
 }
