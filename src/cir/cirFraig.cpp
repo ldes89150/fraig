@@ -64,33 +64,48 @@ CirMgr::strash()
 }
 
 
-
+bool listCompare(IdList &i1, IdList&i2)
+{
+    return i1.size() >i2.size();
+}
 
 
 void
 CirMgr::fraig()
 {
+    fecGroupList->sort(listCompare);
+    
     for(auto &c:cirMgr->readForSim)
     {
         c = true;
     }
     cirMgr->ready = false;
-    fecSolver fs1, fs2;
+    fecSolver fs1, fs2, fs3, fs4;
+
     fs1.init();
     fs2.init();
+    fs3.init();
+    //fs4.init();
     fs1.id = 0;
     fs2.id = 1;
+    fs3.id = 2;
+    //fs4.id = 3;
+
     initFECTask();
     task.clear();
 
     thread mt1(std::ref(fs1));
     thread mt2(std::ref(fs2));
+    thread mt3(std::ref(fs3));
+    //thread mt4(std::ref(fs4));
     while(taskFinish)
     {
         std::this_thread::yield();
     }
     mt1.join();
     mt2.join();
+    mt3.join();
+    //mt4.join();
 
     fraigTaskMerge();
     
@@ -137,8 +152,7 @@ void CirMgr::fecSolver::operator () ()
                         (cirMgr->patternPool[id])[0] = 
                         (cirMgr->patternPool[id])[0]*2 + modelValue; 
                     }
-                    if(meetUNSAT)
-                        counter++;
+                    counter++;
                 }
                 if(cirMgr->ready)
                 {
