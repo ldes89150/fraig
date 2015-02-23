@@ -70,6 +70,11 @@ CirMgr::strash()
 void
 CirMgr::fraig()
 {
+    for(auto &c:cirMgr->readForSim)
+    {
+        c = true;
+    }
+    cirMgr->ready = false;
     fecSolver fs1, fs2;
     fs1.init();
     fs2.init();
@@ -77,6 +82,7 @@ CirMgr::fraig()
     fs2.id = 1;
     initFECTask();
     task.clear();
+
     thread mt1(std::ref(fs1));
     thread mt2(std::ref(fs2));
     while(taskFinish)
@@ -85,14 +91,9 @@ CirMgr::fraig()
     }
     mt1.join();
     mt2.join();
-    for(vector<fraigTask>::iterator itr = task.begin();
-        itr != task.end(); itr++)
-    {
-        merge(getGate(itr->merge),
-              getGate(itr->parent),
-              itr->invert,"Fraig");
 
-    }
+    fraigTaskMerge();
+    
     buildfanout();
     buildDFSList();
     optimize();
@@ -169,8 +170,6 @@ void CirMgr::fecSolver::operator () ()
                 }
             }
             itr->erase(itr->begin());
-            
-
 
         }while(itr->size() > 1);
         cirMgr->fecGroupList->erase(itr);
@@ -247,9 +246,4 @@ void CirMgr::fecSolver::init()
             varArray[gate->fanIn[1].first],gate->fanIn[1].second);
         }
     }
-    for(auto &c:cirMgr->readForSim)
-    {
-        c = true;
-    }
-    cirMgr->ready = false;
 }

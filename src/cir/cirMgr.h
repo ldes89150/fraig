@@ -211,6 +211,19 @@ private:
        lock_guard<mutex> mLock(cirMutex);
        task.push_back(fraigTask(parent, merge, invert));
    }
+    
+   void fraigTaskMerge()
+   {
+        for(vector<fraigTask>::iterator itr = task.begin();
+            itr != task.end(); itr++)
+        {
+            merge(getGate(itr->merge),
+                  getGate(itr->parent),
+                  itr->invert,"Fraig");
+
+        }
+        task.clear();
+   }
 
    SatSolver* satSolver;
    void satInitialize();
